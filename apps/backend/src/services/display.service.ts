@@ -5,14 +5,15 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const backendRoot = resolve(__dirname, "../..");
 const defaultPythonBin = process.env.EPD_PYTHON_BIN || "python3";
 const renderTimeoutMs = Number.parseInt(
   process.env.EPD_RENDER_TIMEOUT_MS || "180000",
   10,
 );
 const renderScriptPath = resolve(
-  __dirname,
-  "../../driver/waveshare/render_photo.py",
+  backendRoot,
+  "driver/waveshare/render_photo.py",
 );
 
 let isRefreshing = false;
