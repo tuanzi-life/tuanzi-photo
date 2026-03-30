@@ -47,6 +47,15 @@ pnpm start            # 生产启动（NODE_ENV=production）
 - **图片处理**：上传时预处理为6色图并缓存，刷屏时直接读取缓存文件
 - **墨水屏驱动**：Python 脚本（厂商 SPI 驱动），后端通过 `child_process` 调用
 
+## 共享包约定
+
+- 前后端共享代码统一放在 `packages/`，不要新建 `shared/` 这类目录
+- 共享类型包固定使用 `packages/shared-types`
+- `packages/shared-types/package.json` 的包名固定为 `@tuanzi-photo/shared-types`
+- 前后端引用共享类型时，统一使用包名导入，例如 `import type { PhotoVO } from "@tuanzi-photo/shared-types"`
+- 不要在业务代码中使用 `../../../packages/...` 这类相对路径直接引用共享类型
+- `shared-types` 只放 TypeScript 类型定义，不放运行时常量、函数、类；如需共享运行时代码，新增独立 package
+
 ## 前端设计规范
 
 项目使用 nuxt-ui 组件库，在创建组件之前，调用 nuxt-ui skill 去了解 nuxt-ui 的组件列表。

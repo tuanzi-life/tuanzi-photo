@@ -23,6 +23,9 @@ importers:
       '@fastify/static':
         specifier: ^8.1.1
         version: 8.3.0
+      '@tuanzi-photo/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       better-sqlite3:
         specifier: ^11.10.0
         version: 11.10.0
@@ -54,6 +57,9 @@ importers:
       '@nuxt/ui':
         specifier: ^4.5.1
         version: 4.6.0(@tiptap/extensions@3.21.0(@tiptap/core@3.21.0(@tiptap/pm@3.21.0))(@tiptap/pm@3.21.0))(@tiptap/y-tiptap@3.0.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.7)(y-protocols@1.0.7(yjs@13.6.30))(yjs@13.6.30))(embla-carousel@8.6.0)(tailwindcss@4.2.2)(typescript@5.9.3)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))(vue-router@5.0.4(@vue/compiler-sfc@3.5.31)(vue@3.5.31(typescript@5.9.3)))(vue@3.5.31(typescript@5.9.3))(yjs@13.6.30)
+      '@tuanzi-photo/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       tailwindcss:
         specifier: ^4.2.1
         version: 4.2.2
@@ -88,6 +94,8 @@ importers:
       vue-tsc:
         specifier: ^3.2.5
         version: 3.2.6(typescript@5.9.3)
+
+  packages/shared-types: {}
 
 packages:
 

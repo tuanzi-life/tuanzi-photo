@@ -1,0 +1,12 @@
+{
+  "name": "@tuanzi-photo/shared-types",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./api": "./api.ts",
+    "./photo": "./photo.ts",
+    "./schedule": "./schedule.ts",
+    "./tag": "./tag.ts"
+  }
+}
