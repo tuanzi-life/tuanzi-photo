@@ -1,0 +1,11 @@
+{
+  "name": "tuanzi-photo",
+  "private": true,
+  "scripts": {
+    "format": "prettier --write --no-error-on-unmatched-pattern \"apps/**/*.{ts,vue,json}\" \"packages/**/*.{ts,json}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

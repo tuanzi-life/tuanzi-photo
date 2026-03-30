@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const f=JSON.parse(d)?.tool_input?.file_path;if(f)require('child_process').execSync('pnpm exec prettier --write --ignore-unknown '+JSON.stringify(f),{stdio:'inherit'})});\""
+          }
+        ]
+      }
+    ]
+  }
+}
