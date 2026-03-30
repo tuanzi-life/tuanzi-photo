@@ -9,7 +9,7 @@ This file provides guidance to **Coding Agent** when working with code in this r
 ## 架构
 
 ```
-apps/frontend   Vue 3 + Vite + @nuxt/ui v4 + vue-router v5（文件路由）
+apps/frontend   Vue 3 + Vite + @nuxt/ui v4 + @iconify/vue + vue-router v5（文件路由）
 apps/backend    Fastify v5 + better-sqlite3 + sharp
 packages/       共享库
 data/           运行时数据，不进版本控制（db/、uploads/、cache/、logs/）
