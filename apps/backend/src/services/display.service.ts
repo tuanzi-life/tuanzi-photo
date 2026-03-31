@@ -3,11 +3,12 @@ import { spawn } from "node:child_process";
 import { constants as fsConstants } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { env } from "../env.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const backendRoot = resolve(__dirname, "../..");
-const defaultPythonBin = process.env.EPD_PYTHON_BIN || "python3";
-const renderTimeoutMs = Number.parseInt(process.env.EPD_RENDER_TIMEOUT_MS || "180000", 10);
+const defaultPythonBin = env.epd.pythonBin;
+const renderTimeoutMs = env.epd.renderTimeoutMs;
 const renderScriptPath = resolve(backendRoot, "driver/waveshare/render_photo.py");
 
 let isRefreshing = false;

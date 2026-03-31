@@ -1,4 +1,4 @@
-export type { ApiCode, ApiResponse } from "./api";
-export type { PhotoVO } from "./photo";
-export type { ScheduleVO } from "./schedule";
-export type { TagVO } from "./tag";
+export type { ApiCode, ApiResponse } from "./api.js";
+export type { PhotoVO, PhotoListResponse } from "./photo.js";
+export type { ScheduleVO, UpdateScheduleBody } from "./schedule.js";
+export type { TagVO, TagListResponse } from "./tag.js";

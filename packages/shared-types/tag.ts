@@ -1,9 +1,14 @@
-/** 标签VO */
+/** 标签 VO */
 export interface TagVO {
-  /** 标签ID */
-  id: string;
+  /** 标签 ID */
+  id: number;
   /** 标签名称 */
   name: string;
-  /** 照片数量 */
-  photos: number;
+  /** 该标签下的照片数量 */
+  count: number;
+}
+
+/** 标签列表响应 */
+export interface TagListResponse {
+  items: TagVO[];
 }

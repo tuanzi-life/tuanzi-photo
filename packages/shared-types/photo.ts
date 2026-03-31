@@ -1,11 +1,21 @@
 /**
- * 照片VO
+ * 照片 VO
  */
 export interface PhotoVO {
-  /** 照片ID */
-  id: string;
-  /** 照片URL */
+  /** 照片 ID */
+  id: number;
+  /** 文件名 */
+  filename: string;
+  /** 照片 URL */
   url: string;
-  /** 照片标签列表 */
+  /** 标签名称列表 */
   tags: string[];
+  /** 创建时间（Unix 秒） */
+  createdAt: number;
+}
+
+/** 照片列表响应 */
+export interface PhotoListResponse {
+  total: number;
+  items: PhotoVO[];
 }
