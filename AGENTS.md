@@ -15,6 +15,15 @@ packages/       共享库
 data/           运行时数据，不进版本控制（db/、uploads/、cache/、logs/）
 ```
 
+项目使用 `pnpm workspace` 管理的 monorepo。根目录通过 `pnpm-workspace.yaml` 统一管理 `apps/*` 和 `packages/*` 下的多个 workspace package；当前主要 workspace 包包括 `frontend`、`backend` 和 `@tuanzi-photo/shared-types`。
+
+安装依赖时，优先进入对应 workspace 目录执行 `pnpm add <pkg>`；如果在根目录执行，则必须显式指定目标 workspace，例如：
+
+```bash
+pnpm --filter frontend add <pkg>
+pnpm --filter backend add <pkg>
+```
+
 **开发环境**：访问 `127.0.0.1:4011`，Vite 将 `/api/*` 代理到 `127.0.0.1:4010`
 
 **生产环境**：只跑 Fastify（4010），`NODE_ENV=production` 时自动用 `@fastify/static` 托管 `apps/frontend/dist/`
