@@ -1,56 +1,14 @@
 import { defineStore } from "pinia";
+import { useToast } from "@nuxt/ui/composables/useToast";
 import type { Photo } from "../types";
-
-const MOCK_PHOTOS: Photo[] = [
-  {
-    id: "1",
-    url: "https://picsum.photos/seed/1/800/600",
-    thumbnailUrl: "https://picsum.photos/seed/1/400/300",
-    filename: "morning-light.jpg",
-    tags: ["风景", "自然"],
-  },
-  {
-    id: "2",
-    url: "https://picsum.photos/seed/2/800/600",
-    thumbnailUrl: "https://picsum.photos/seed/2/400/300",
-    filename: "city-night.jpg",
-    tags: ["城市", "夜景"],
-  },
-  {
-    id: "3",
-    url: "https://picsum.photos/seed/3/800/600",
-    thumbnailUrl: "https://picsum.photos/seed/3/400/300",
-    filename: "forest-path.jpg",
-    tags: ["风景", "自然"],
-  },
-  {
-    id: "4",
-    url: "https://picsum.photos/seed/4/800/600",
-    thumbnailUrl: "https://picsum.photos/seed/4/400/300",
-    filename: "ocean-wave.jpg",
-    tags: ["海洋", "自然"],
-  },
-  {
-    id: "5",
-    url: "https://picsum.photos/seed/5/800/600",
-    thumbnailUrl: "https://picsum.photos/seed/5/400/300",
-    filename: "mountain-peak.jpg",
-    tags: ["风景", "山"],
-  },
-  {
-    id: "6",
-    url: "https://picsum.photos/seed/6/800/600",
-    thumbnailUrl: "https://picsum.photos/seed/6/400/300",
-    filename: "street-art.jpg",
-    tags: ["城市", "艺术"],
-  },
-];
+import type { ApiResponse, PhotoListResponse, PhotoVO } from "@tuanzi-photo/shared-types";
 
 export const usePhotoStore = defineStore("photo", {
   state: () => ({
     photos: [] as Photo[],
     selectedTags: [] as string[],
     currentPhoto: null as Photo | null,
+    loading: false,
   }),
 
   getters: {
@@ -71,30 +29,78 @@ export const usePhotoStore = defineStore("photo", {
   },
 
   actions: {
-    fetchPhotos() {
-      this.photos = MOCK_PHOTOS;
-    },
-
-    uploadPhoto() {
-      const id = String(Date.now());
-      this.photos.push({
-        id,
-        url: `https://picsum.photos/seed/${id}/800/600`,
-        thumbnailUrl: `https://picsum.photos/seed/${id}/400/300`,
-        filename: `photo-${id}.jpg`,
-        tags: ["未分类"],
-      });
-    },
-
-    deletePhoto(id: string) {
-      this.photos = this.photos.filter((p) => p.id !== id);
-      if (this.currentPhoto?.id === id) {
-        this.currentPhoto = null;
+    async fetchPhotos() {
+      const toast = useToast();
+      this.loading = true;
+      try {
+        const res = await fetch("/api/v1/photos");
+        const body: ApiResponse<PhotoListResponse> = await res.json();
+        if (body.code === 0) {
+          this.photos = body.data.items;
+        } else {
+          toast.add({ title: body.message, color: "error" });
+        }
+      } catch {
+        toast.add({ title: "加载照片失败，请检查网络", color: "error" });
+      } finally {
+        this.loading = false;
       }
     },
 
-    pushToScreen(_id: string) {
-      // 模拟推送成功
+    async uploadPhoto(file: File, tags: string[]) {
+      const toast = useToast();
+      const form = new FormData();
+      form.append("file", file);
+      if (tags.length > 0) {
+        form.append("tags", tags.join(","));
+      }
+      try {
+        const res = await fetch("/api/v1/photos/upload", { method: "POST", body: form });
+        const body: ApiResponse<PhotoVO> = await res.json();
+        if (body.code === 0) {
+          this.photos.unshift(body.data);
+          toast.add({ title: "上传成功", color: "success" });
+        } else {
+          toast.add({ title: body.message, color: "error" });
+        }
+      } catch {
+        toast.add({ title: "上传失败，请检查网络", color: "error" });
+      }
+    },
+
+    async deletePhoto(id: number) {
+      const toast = useToast();
+      try {
+        const res = await fetch(`/api/v1/photos/${id}`, { method: "DELETE" });
+        const body: ApiResponse<null> = await res.json();
+        if (body.code === 0) {
+          this.photos = this.photos.filter((p) => p.id !== id);
+          if (this.currentPhoto?.id === id) {
+            this.currentPhoto = null;
+          }
+        } else {
+          toast.add({ title: body.message, color: "error" });
+        }
+      } catch {
+        toast.add({ title: "删除失败，请检查网络", color: "error" });
+      }
+    },
+
+    async pushToScreen(id: number) {
+      const toast = useToast();
+      try {
+        const res = await fetch(`/api/v1/photos/${id}/push`, { method: "POST" });
+        const body: ApiResponse<null> = await res.json();
+        if (body.code === 0) {
+          toast.add({ title: "推送成功，正在刷新", color: "success" });
+        } else if (body.code === 409) {
+          toast.add({ title: "墨水屏正在刷新，请稍后再试", color: "warning" });
+        } else {
+          toast.add({ title: body.message, color: "error" });
+        }
+      } catch {
+        toast.add({ title: "推送失败，请检查网络", color: "error" });
+      }
     },
 
     toggleTag(tag: string) {

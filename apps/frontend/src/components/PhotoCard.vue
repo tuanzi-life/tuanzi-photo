@@ -11,6 +11,6 @@ const photoStore = usePhotoStore();
     class="relative overflow-hidden rounded-lg cursor-pointer bg-muted aspect-square"
     @click="photoStore.setCurrentPhoto(props.photo)"
   >
-    <img :src="photo.thumbnailUrl" :alt="photo.filename" class="w-full h-full object-cover" loading="lazy" />
+    <img :src="photo.url" :alt="photo.filename" class="w-full h-full object-cover" loading="lazy" />
   </div>
 </template>
