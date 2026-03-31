@@ -3,7 +3,7 @@ import { displayPhoto, getDisplayRefreshState } from "../services/display.servic
 import type { FastifyInstance } from "fastify";
 
 export interface ScreenService {
-  pushPhoto(photoLocalPath: string): Promise<void>;
+  pushPhoto(objectKey: string): Promise<void>;
   get isRefreshing(): boolean;
 }
 

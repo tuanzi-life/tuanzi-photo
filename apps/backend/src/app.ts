@@ -31,9 +31,12 @@ await app.register(multipart, { limits: { fileSize: 50 * 1024 * 1024 } }); // 50
 
 // 生产环境托管前端构建产物
 if (env.nodeEnv === "production") {
+  const frontendDist = join(__dirname, "../../frontend/dist");
   await app.register(staticFiles, {
-    root: join(__dirname, "../../frontend/dist"),
+    root: frontendDist,
     prefix: "/",
+    // 不开启通配，手动注册 SPA fallback 以避免与 API 路由冲突
+    wildcard: false,
   });
 }
 
@@ -45,5 +48,12 @@ await app.register(scheduleRoutes, { prefix: "/api/v1" });
 app.get("/health", async () => {
   return { status: "ok" };
 });
+
+// SPA fallback：所有非 API、非静态资源的请求返回 index.html
+if (env.nodeEnv === "production") {
+  app.setNotFoundHandler((_request, reply) => {
+    reply.sendFile("index.html");
+  });
+}
 
 await app.listen({ port: env.port, host: env.host });

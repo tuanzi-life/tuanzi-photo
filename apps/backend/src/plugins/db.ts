@@ -7,7 +7,12 @@ import type { FastifyInstance } from "fastify";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = resolve(__dirname, "../../../../data/db/main.db");
-const SCHEMA_PATH = resolve(__dirname, "../../sql/schema.sql");
+// 开发时 __dirname = src/plugins，生产时 __dirname = dist/plugins
+// 开发时 sql 在 apps/backend/sql（../../sql），生产时构建脚本复制到 dist/sql（../sql）
+const SCHEMA_PATH =
+  process.env.NODE_ENV === "production"
+    ? resolve(__dirname, "../sql/schema.sql")
+    : resolve(__dirname, "../../sql/schema.sql");
 
 declare module "fastify" {
   interface FastifyInstance {

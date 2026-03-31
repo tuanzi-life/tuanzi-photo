@@ -2,7 +2,7 @@ import { extname } from "node:path";
 import { unlink } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
-import { listPhotos, getPhotoById, createPhoto, deletePhoto } from "../services/photo.service.js";
+import { listPhotos, getPhotoObjectKeyById, createPhoto, deletePhoto } from "../services/photo.service.js";
 import { uploadPhotoToOSS, deletePhotoFromOSS } from "../services/oss.service.js";
 import { ok, err } from "../utils/response.js";
 import type { ApiResponse, PhotoListResponse, PhotoVO } from "@tuanzi-photo/shared-types";
@@ -34,8 +34,17 @@ export default async function photosRoutes(fastify: FastifyInstance) {
   // POST /photos/upload
   fastify.post("/photos/upload", async (request): Promise<ApiResponse<PhotoVO | null>> => {
     const files = await request.saveRequestFiles();
+
+    // 清理所有文件的辅助函数，确保不泄漏临时文件
+    const cleanupAll = () => Promise.all(files.map((f) => unlink(f.filepath).catch(() => {})));
+
     if (!files.length) {
       return err(400, "请上传文件");
+    }
+
+    if (files.length > 1) {
+      await cleanupAll();
+      return err(400, "每次只能上传一个文件");
     }
 
     const uploaded = files[0];
@@ -62,7 +71,7 @@ export default async function photosRoutes(fastify: FastifyInstance) {
       const photo = await createPhoto(fastify.db, filename, objectKey, tags);
       return ok(photo);
     } finally {
-      await unlink(filepath).catch(() => {});
+      await cleanupAll();
     }
   });
 
@@ -80,17 +89,20 @@ export default async function photosRoutes(fastify: FastifyInstance) {
     },
     async (request): Promise<ApiResponse<null>> => {
       const id = Number(request.params.id);
-      const objectKey = deletePhoto(fastify.db, id);
-      if (objectKey === null) {
+      // 先查询确认存在
+      const existing = getPhotoObjectKeyById(fastify.db, id);
+      if (existing === null) {
         return err(404, "照片不存在");
       }
 
-      if (objectKey) {
-        deletePhotoFromOSS(objectKey).catch((e: Error) => {
-          fastify.log.warn({ err: e }, "OSS 文件删除失败");
+      // 先删 OSS，再删 DB，避免 DB 已删而 OSS 还在的孤儿对象
+      if (existing) {
+        await deletePhotoFromOSS(existing).catch((e: Error) => {
+          fastify.log.warn({ err: e }, "OSS 文件删除失败，继续删除数据库记录");
         });
       }
 
+      deletePhoto(fastify.db, id);
       return ok(null);
     }
   );
@@ -113,12 +125,12 @@ export default async function photosRoutes(fastify: FastifyInstance) {
       }
 
       const id = Number(request.params.id);
-      const photo = await getPhotoById(fastify.db, id);
-      if (!photo) {
+      const objectKey = getPhotoObjectKeyById(fastify.db, id);
+      if (!objectKey) {
         return err(404, "照片不存在");
       }
 
-      fastify.screen.pushPhoto(photo.url).catch((e: Error) => {
+      fastify.screen.pushPhoto(objectKey).catch((e: Error) => {
         fastify.log.error({ err: e }, "墨水屏推送失败");
       });
 

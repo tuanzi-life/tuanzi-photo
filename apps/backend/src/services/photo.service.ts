@@ -74,6 +74,11 @@ export async function createPhoto(
   return (await getPhotoById(db, photoId))!;
 }
 
+export function getPhotoObjectKeyById(db: Database.Database, id: number): string | null {
+  const row = db.prepare("select object_key from photo where id = ?").get(id) as { object_key: string } | undefined;
+  return row ? row.object_key : null;
+}
+
 export function deletePhoto(db: Database.Database, id: number): string | null {
   const row = db.prepare("select object_key from photo where id = ?").get(id) as { object_key: string } | undefined;
   if (!row) return null;

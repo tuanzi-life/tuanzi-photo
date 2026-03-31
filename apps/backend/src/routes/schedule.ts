@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { getSchedule, upsertSchedule, pickPhotoForRefresh } from "../services/schedule.service.js";
-import { getPhotoById } from "../services/photo.service.js";
+import { getPhotoObjectKeyById } from "../services/photo.service.js";
 import { ok, err } from "../utils/response.js";
 import type { ApiResponse, ScheduleVO, UpdateScheduleBody } from "@tuanzi-photo/shared-types";
 
@@ -45,12 +45,12 @@ export default async function scheduleRoutes(fastify: FastifyInstance) {
       return err(404, "没有可用的照片");
     }
 
-    const photo = await getPhotoById(fastify.db, photoId);
-    if (!photo) {
+    const objectKey = getPhotoObjectKeyById(fastify.db, photoId);
+    if (!objectKey) {
       return err(404, "没有可用的照片");
     }
 
-    fastify.screen.pushPhoto(photo.url).catch((e: Error) => {
+    fastify.screen.pushPhoto(objectKey).catch((e: Error) => {
       fastify.log.error({ err: e }, "墨水屏刷新失败");
     });
 
