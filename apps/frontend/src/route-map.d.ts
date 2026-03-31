@@ -53,7 +53,9 @@ declare module "vue-router/auto-routes" {
    * @internal
    */
   export type _RouteNamesForFilePath<FilePath extends string> =
-    _RouteFileInfoMap extends Record<FilePath, infer Info> ? Info["routes"] : keyof RouteNamedMap;
+    _RouteFileInfoMap extends Record<FilePath, infer Info>
+      ? Info["routes"]
+      : keyof RouteNamedMap;
 }
 
 export {};

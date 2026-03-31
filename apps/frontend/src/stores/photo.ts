@@ -14,7 +14,9 @@ export const usePhotoStore = defineStore("photo", {
   getters: {
     filteredPhotos(state): Photo[] {
       if (state.selectedTags.length === 0) return state.photos;
-      return state.photos.filter((p) => state.selectedTags.every((tag) => p.tags.includes(tag)));
+      return state.photos.filter((p) =>
+        state.selectedTags.every((tag) => p.tags.includes(tag))
+      );
     },
 
     allTags(state): { tag: string; count: number }[] {

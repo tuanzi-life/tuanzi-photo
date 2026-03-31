@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { useToast } from "@nuxt/ui/composables/useToast";
-import type { ApiResponse, ScheduleVO, UpdateScheduleBody } from "@tuanzi-photo/shared-types";
+import type {
+  ApiResponse,
+  ScheduleVO,
+  UpdateScheduleBody,
+} from "@tuanzi-photo/shared-types";
 
 export const useScheduleStore = defineStore("schedule", {
   state: () => ({

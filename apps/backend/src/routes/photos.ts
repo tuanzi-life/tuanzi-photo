@@ -2,7 +2,12 @@ import { extname } from "node:path";
 import { unlink } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
-import { listPhotos, getPhotoObjectKeyById, createPhoto, deletePhoto } from "../services/photo.service.js";
+import {
+  listPhotos,
+  getPhotoObjectKeyById,
+  createPhoto,
+  deletePhoto,
+} from "../services/photo.service.js";
 import { uploadPhotoToOSS, deletePhotoFromOSS } from "../services/oss.service.js";
 import { ok, err } from "../utils/response.js";
 import type { ApiResponse, PhotoListResponse, PhotoVO } from "@tuanzi-photo/shared-types";
@@ -32,48 +37,55 @@ export default async function photosRoutes(fastify: FastifyInstance) {
   );
 
   // POST /photos/upload
-  fastify.post("/photos/upload", async (request): Promise<ApiResponse<PhotoVO | null>> => {
-    const files = await request.saveRequestFiles();
+  fastify.post(
+    "/photos/upload",
+    async (request): Promise<ApiResponse<PhotoVO | null>> => {
+      const files = await request.saveRequestFiles();
 
-    // 清理所有文件的辅助函数，确保不泄漏临时文件
-    const cleanupAll = () => Promise.all(files.map((f) => unlink(f.filepath).catch(() => {})));
+      // 清理所有文件的辅助函数，确保不泄漏临时文件
+      const cleanupAll = () =>
+        Promise.all(files.map((f) => unlink(f.filepath).catch(() => {})));
 
-    if (!files.length) {
-      return err(400, "请上传文件");
-    }
-
-    if (files.length > 1) {
-      await cleanupAll();
-      return err(400, "每次只能上传一个文件");
-    }
-
-    const uploaded = files[0];
-    const { filepath, filename } = uploaded;
-
-    // 从 fields 中取 tags（逗号分隔字符串）
-    const tagsField = uploaded.fields.tags;
-    const tagsStr = tagsField && !Array.isArray(tagsField) && tagsField.type === "field" ? String(tagsField.value) : "";
-    const tags = tagsStr
-      ? tagsStr
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-
-    const ext = extname(filename) || ".jpg";
-    const objectKey = `photos/${Date.now()}-${randomBytes(4).toString("hex")}${ext}`;
-
-    try {
-      const success = await uploadPhotoToOSS(filepath, objectKey);
-      if (!success) {
-        return err(500, "上传 OSS 失败");
+      if (!files.length) {
+        return err(400, "请上传文件");
       }
-      const photo = await createPhoto(fastify.db, filename, objectKey, tags);
-      return ok(photo);
-    } finally {
-      await cleanupAll();
+
+      if (files.length > 1) {
+        await cleanupAll();
+        return err(400, "每次只能上传一个文件");
+      }
+
+      const uploaded = files[0];
+      const { filepath, filename } = uploaded;
+
+      // 从 fields 中取 tags（逗号分隔字符串）
+      const tagsField = uploaded.fields.tags;
+      const tagsStr =
+        tagsField && !Array.isArray(tagsField) && tagsField.type === "field"
+          ? String(tagsField.value)
+          : "";
+      const tags = tagsStr
+        ? tagsStr
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [];
+
+      const ext = extname(filename) || ".jpg";
+      const objectKey = `photos/${Date.now()}-${randomBytes(4).toString("hex")}${ext}`;
+
+      try {
+        const success = await uploadPhotoToOSS(filepath, objectKey);
+        if (!success) {
+          return err(500, "上传 OSS 失败");
+        }
+        const photo = await createPhoto(fastify.db, filename, objectKey, tags);
+        return ok(photo);
+      } finally {
+        await cleanupAll();
+      }
     }
-  });
+  );
 
   // DELETE /photos/:id
   fastify.delete<{ Params: { id: string } }>(

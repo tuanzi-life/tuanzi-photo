@@ -6,7 +6,10 @@ import { getOSSClient } from "../utils/oss.js";
  * @param objectKey object key
  * @returns
  */
-export async function uploadPhotoToOSS(filePath: string, objectKey: string): Promise<boolean> {
+export async function uploadPhotoToOSS(
+  filePath: string,
+  objectKey: string
+): Promise<boolean> {
   const client = getOSSClient();
   const result = await client.put(objectKey, filePath);
   return result.res.status === 200;
@@ -39,7 +42,10 @@ export async function getPhotoURL(objectKey: string): Promise<string> {
  * @param style https://help.aliyun.com/zh/oss/developer-reference/img-5
  * @returns
  */
-export async function getPhotoProcessURL(objectKey: string, style: string): Promise<string> {
+export async function getPhotoProcessURL(
+  objectKey: string,
+  style: string
+): Promise<string> {
   const client = getOSSClient();
   return client.signatureUrl(objectKey, { process: style, expires: 3600 });
 }

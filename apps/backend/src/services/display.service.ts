@@ -10,7 +10,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // 生产时 __dirname = dist/services，../../ = apps/backend
 const backendRoot = resolve(__dirname, "../..");
 // 开发时 driver 在 apps/backend/driver，生产时构建脚本复制到 apps/backend/dist/driver
-const driverBase = env.nodeEnv === "production" ? resolve(backendRoot, "dist/driver") : resolve(backendRoot, "driver");
+const driverBase =
+  env.nodeEnv === "production"
+    ? resolve(backendRoot, "dist/driver")
+    : resolve(backendRoot, "driver");
 const renderScriptPath = resolve(driverBase, "waveshare/render_photo.py");
 const cacheDir = resolve(backendRoot, "../../data/cache");
 const defaultPythonBin = env.epd.pythonBin;
@@ -102,7 +105,9 @@ function runRenderProcess(localFilePath: string): Promise<void> {
         return;
       }
 
-      const details = [`render_photo.py exited with code=${code ?? "null"} signal=${signal ?? "null"}`];
+      const details = [
+        `render_photo.py exited with code=${code ?? "null"} signal=${signal ?? "null"}`,
+      ];
 
       if (stdout.trim()) {
         details.push(`stdout:\n${stdout.trim()}`);

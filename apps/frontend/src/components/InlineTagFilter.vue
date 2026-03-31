@@ -7,7 +7,10 @@ const { allTags, selectedTags } = storeToRefs(photoStore);
 </script>
 
 <template>
-  <div v-if="allTags.length > 0" class="flex gap-2 overflow-x-auto px-3 py-2 scrollbar-none">
+  <div
+    v-if="allTags.length > 0"
+    class="flex gap-2 overflow-x-auto px-3 py-2 scrollbar-none"
+  >
     <UButton
       v-for="{ tag, count } in allTags"
       :key="tag"

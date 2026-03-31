@@ -20,7 +20,9 @@ const DEFAULT_SCHEDULE: Omit<ScheduleRow, "id" | "updated_at"> = {
 };
 
 export function getSchedule(db: Database.Database): ScheduleVO {
-  let row = db.prepare("select * from schedule where id = 1").get() as ScheduleRow | undefined;
+  let row = db.prepare("select * from schedule where id = 1").get() as
+    | ScheduleRow
+    | undefined;
 
   if (!row) {
     db.prepare(
@@ -39,7 +41,10 @@ export function getSchedule(db: Database.Database): ScheduleVO {
   return rowToVO(row);
 }
 
-export function upsertSchedule(db: Database.Database, body: UpdateScheduleBody): ScheduleVO {
+export function upsertSchedule(
+  db: Database.Database,
+  body: UpdateScheduleBody
+): ScheduleVO {
   const relatedTagsJson = JSON.stringify(body.relatedTags);
 
   db.prepare(
@@ -52,23 +57,34 @@ export function upsertSchedule(db: Database.Database, body: UpdateScheduleBody):
        refresh_rule = excluded.refresh_rule,
        related_tags = excluded.related_tags,
        updated_at = excluded.updated_at`
-  ).run(body.refreshMode, body.timingHour, body.intervalHours, body.refreshRule, relatedTagsJson);
+  ).run(
+    body.refreshMode,
+    body.timingHour,
+    body.intervalHours,
+    body.refreshRule,
+    relatedTagsJson
+  );
 
   return getSchedule(db);
 }
 
-export function pickPhotoForRefresh(db: Database.Database, schedule: ScheduleVO): number | null {
+export function pickPhotoForRefresh(
+  db: Database.Database,
+  schedule: ScheduleVO
+): number | null {
   const tags = schedule.relatedTags;
   let photoId: number | null = null;
 
   if (tags.length === 0) {
     if (schedule.refreshRule === "random") {
-      const row = db.prepare("select id from photo order by random() limit 1").get() as { id: number } | undefined;
-      photoId = row?.id ?? null;
-    } else {
-      const row = db.prepare("select id from photo order by created_at asc limit 1").get() as
+      const row = db.prepare("select id from photo order by random() limit 1").get() as
         | { id: number }
         | undefined;
+      photoId = row?.id ?? null;
+    } else {
+      const row = db
+        .prepare("select id from photo order by created_at asc limit 1")
+        .get() as { id: number } | undefined;
       photoId = row?.id ?? null;
     }
   } else {

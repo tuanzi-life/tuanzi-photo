@@ -6,8 +6,14 @@ import { usePhotoStore } from "../stores/photo";
 
 const scheduleStore = useScheduleStore();
 const photoStore = usePhotoStore();
-const { refreshMode, timingHour, intervalHours, relatedTags, refreshRule, nextRefreshTime } =
-  storeToRefs(scheduleStore);
+const {
+  refreshMode,
+  timingHour,
+  intervalHours,
+  relatedTags,
+  refreshRule,
+  nextRefreshTime,
+} = storeToRefs(scheduleStore);
 
 const hourOptions = Array.from({ length: 24 }, (_, i) => ({
   label: `${String(i).padStart(2, "0")}:00`,
@@ -88,13 +94,28 @@ const nextRefreshTimeStr = computed(() => {
 
     <!-- 操作按钮 -->
     <div class="flex gap-2">
-      <UButton size="sm" color="primary" class="flex-1" @click="scheduleStore.saveSchedule()"> 保存配置 </UButton>
-      <UButton size="sm" color="neutral" variant="outline" class="flex-1" @click="scheduleStore.triggerRefresh()">
+      <UButton
+        size="sm"
+        color="primary"
+        class="flex-1"
+        @click="scheduleStore.saveSchedule()"
+      >
+        保存配置
+      </UButton>
+      <UButton
+        size="sm"
+        color="neutral"
+        variant="outline"
+        class="flex-1"
+        @click="scheduleStore.triggerRefresh()"
+      >
         立即刷新
       </UButton>
     </div>
 
     <!-- 下次刷新时间 -->
-    <p v-if="nextRefreshTimeStr" class="text-xs text-muted text-center">下次刷新：{{ nextRefreshTimeStr }}</p>
+    <p v-if="nextRefreshTimeStr" class="text-xs text-muted text-center">
+      下次刷新：{{ nextRefreshTimeStr }}
+    </p>
   </div>
 </template>

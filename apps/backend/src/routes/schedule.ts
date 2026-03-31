@@ -1,8 +1,16 @@
 import type { FastifyInstance } from "fastify";
-import { getSchedule, upsertSchedule, pickPhotoForRefresh } from "../services/schedule.service.js";
+import {
+  getSchedule,
+  upsertSchedule,
+  pickPhotoForRefresh,
+} from "../services/schedule.service.js";
 import { getPhotoObjectKeyById } from "../services/photo.service.js";
 import { ok, err } from "../utils/response.js";
-import type { ApiResponse, ScheduleVO, UpdateScheduleBody } from "@tuanzi-photo/shared-types";
+import type {
+  ApiResponse,
+  ScheduleVO,
+  UpdateScheduleBody,
+} from "@tuanzi-photo/shared-types";
 
 export default async function scheduleRoutes(fastify: FastifyInstance) {
   // GET /schedule
@@ -17,7 +25,13 @@ export default async function scheduleRoutes(fastify: FastifyInstance) {
       schema: {
         body: {
           type: "object",
-          required: ["refreshMode", "timingHour", "intervalHours", "refreshRule", "relatedTags"],
+          required: [
+            "refreshMode",
+            "timingHour",
+            "intervalHours",
+            "refreshRule",
+            "relatedTags",
+          ],
           properties: {
             refreshMode: { type: "string", enum: ["timing", "interval"] },
             timingHour: { type: "integer", minimum: 0, maximum: 23 },

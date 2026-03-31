@@ -18,7 +18,9 @@ const { filteredPhotos, photos, selectedTags } = storeToRefs(photoStore);
 
     <div class="flex flex-1 overflow-hidden">
       <!-- 左侧控制栏 -->
-      <aside class="w-72 shrink-0 border-r border-default overflow-y-auto p-4 flex flex-col gap-6">
+      <aside
+        class="w-72 shrink-0 border-r border-default overflow-y-auto p-4 flex flex-col gap-6"
+      >
         <TagFilter />
         <USeparator />
         <SchedulePanel />

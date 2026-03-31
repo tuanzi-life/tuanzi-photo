@@ -27,11 +27,22 @@ const activeTab = ref<"photos" | "schedule">("photos");
       <div v-if="activeTab === 'photos'" class="flex flex-col h-full">
         <InlineTagFilter />
         <div class="flex items-center px-3 py-1">
-          <span class="text-xs text-muted">{{ filteredPhotos.length }}/{{ photos.length }} 张</span>
+          <span class="text-xs text-muted"
+            >{{ filteredPhotos.length }}/{{ photos.length }} 张</span
+          >
         </div>
         <div class="flex-1 overflow-y-auto px-3 pb-3">
-          <PhotoGrid v-if="filteredPhotos.length > 0" :photos="filteredPhotos" :columns="2" />
-          <EmptyState v-else icon="i-lucide-image" title="还没有照片" description="点击上传图片" />
+          <PhotoGrid
+            v-if="filteredPhotos.length > 0"
+            :photos="filteredPhotos"
+            :columns="2"
+          />
+          <EmptyState
+            v-else
+            icon="i-lucide-image"
+            title="还没有照片"
+            description="点击上传图片"
+          />
         </div>
       </div>
 
