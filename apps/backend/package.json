@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/app.ts",
-    "build": "tsc && node scripts/copy-driver.mjs",
+    "build": "NODE_OPTIONS=\"${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=${BACKEND_BUILD_HEAP_MB:-192}\" tsc && node scripts/copy-driver.mjs",
+    "build:pi": "NODE_OPTIONS=\"${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=192\" tsc && node scripts/copy-driver.mjs",
     "start": "node --max-old-space-size=128 dist/app.js",
     "typecheck": "tsc --noEmit"
   },

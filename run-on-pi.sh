@@ -33,6 +33,13 @@ check_service_template() {
   grep -q '^WorkingDirectory=' "${SERVICE_SRC}" || fail "Service file is missing WorkingDirectory"
 }
 
+stop_service_if_running() {
+  if sudo systemctl is-active --quiet "${SERVICE_NAME}"; then
+    log "Stopping ${SERVICE_NAME} before build to free memory"
+    sudo systemctl stop "${SERVICE_NAME}"
+  fi
+}
+
 run_build() {
   log "Running build-on-pi.sh"
   bash "${REPO_ROOT}/build-on-pi.sh"
@@ -64,6 +71,7 @@ main() {
   require_command sudo
   require_command systemctl
   check_service_template
+  stop_service_if_running
   run_build
   install_service
   reload_and_restart_service

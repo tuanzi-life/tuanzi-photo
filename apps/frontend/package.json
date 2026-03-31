@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "NODE_OPTIONS=\"${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=${FRONTEND_BUILD_HEAP_MB:-256}\" vite build",
+    "build:pi": "FRONTEND_BUILD_HEAP_MB=256 vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc -p ./tsconfig.app.json"
   },

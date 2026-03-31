@@ -102,18 +102,26 @@ prepare_runtime_dirs() {
 }
 
 install_dependencies() {
+  if [[ "${SKIP_PNPM_INSTALL:-0}" == "1" ]]; then
+    log "Skipping dependency installation because SKIP_PNPM_INSTALL=1"
+    return
+  fi
+
   log "Installing workspace dependencies"
-  "${PNPM_CMD[@]}" install --frozen-lockfile
+  "${PNPM_CMD[@]}" install \
+    --frozen-lockfile \
+    --child-concurrency="${PNPM_CHILD_CONCURRENCY:-1}" \
+    --network-concurrency="${PNPM_NETWORK_CONCURRENCY:-1}"
 }
 
 build_frontend() {
-  log "Building frontend"
-  "${PNPM_CMD[@]}" --filter frontend build
+  log "Building frontend with low-memory profile"
+  "${PNPM_CMD[@]}" --filter frontend build:pi
 }
 
 build_backend() {
-  log "Building backend"
-  "${PNPM_CMD[@]}" --filter backend build
+  log "Building backend with low-memory profile"
+  "${PNPM_CMD[@]}" --filter backend build:pi
 }
 
 print_next_steps() {
