@@ -3,40 +3,36 @@ import { storeToRefs } from "pinia";
 import { useScheduleStore } from "../stores/schedule";
 
 const scheduleStore = useScheduleStore();
-const { mode, time, intervalHours, rule, nextRefreshTime } = storeToRefs(scheduleStore);
+const { mode, hour, intervalHours, rule, nextRefreshTime } = storeToRefs(scheduleStore);
 
 const isOpen = defineModel<boolean>("open", { default: false });
+
+const hourOptions = Array.from({ length: 24 }, (_, i) => ({
+  label: `${String(i).padStart(2, "0")}:00`,
+  value: i,
+}));
 </script>
 
 <template>
   <USlideover v-model:open="isOpen" side="bottom" title="定时刷新">
     <div class="p-4 flex flex-col gap-4">
       <!-- 模式 -->
-      <div class="flex gap-2">
-        <UButton
-          size="sm"
-          :color="mode === 'daily' ? 'primary' : 'neutral'"
-          :variant="mode === 'daily' ? 'solid' : 'outline'"
-          class="flex-1"
-          @click="mode = 'daily'"
-        >
-          每天定时
-        </UButton>
-        <UButton
-          size="sm"
-          :color="mode === 'interval' ? 'primary' : 'neutral'"
-          :variant="mode === 'interval' ? 'solid' : 'outline'"
-          class="flex-1"
-          @click="mode = 'interval'"
-        >
-          每隔 N 小时
-        </UButton>
-      </div>
+      <URadioGroup
+        v-model="mode"
+        orientation="horizontal"
+        variant="card"
+        size="xs"
+        :ui="{ label: 'text-xs text-default font-medium' }"
+        :items="[
+          { label: '每天定时', value: 'timing' },
+          { label: '固定间隔', value: 'interval' },
+        ]"
+      />
 
       <!-- 时间 -->
-      <div v-if="mode === 'daily'">
+      <div v-if="mode === 'timing'">
         <label class="text-sm text-muted mb-1 block">刷新时间</label>
-        <UInput v-model="time" type="time" />
+        <USelect v-model="hour" :items="hourOptions" />
       </div>
       <div v-else>
         <label class="text-sm text-muted mb-1 block">间隔小时数</label>
@@ -46,22 +42,16 @@ const isOpen = defineModel<boolean>("open", { default: false });
       <!-- 规则 -->
       <div>
         <label class="text-sm text-muted mb-2 block">刷新规则</label>
-        <div class="flex gap-2">
-          <button
-            class="flex-1 py-2 px-3 rounded-md border text-sm transition-colors"
-            :class="rule === 'time' ? 'border-primary text-primary bg-primary/5' : 'border-default text-muted'"
-            @click="rule = 'time'"
-          >
-            按上传时间
-          </button>
-          <button
-            class="flex-1 py-2 px-3 rounded-md border text-sm transition-colors"
-            :class="rule === 'random' ? 'border-primary text-primary bg-primary/5' : 'border-default text-muted'"
-            @click="rule = 'random'"
-          >
-            随机
-          </button>
-        </div>
+        <URadioGroup
+          v-model="rule"
+          orientation="horizontal"
+          size="sm"
+          :ui="{ label: 'text-sm text-default' }"
+          :items="[
+            { label: '按上传时间', value: 'time' },
+            { label: '随机', value: 'random' },
+          ]"
+        />
       </div>
 
       <p v-if="nextRefreshTime" class="text-xs text-muted text-center">下次刷新：{{ nextRefreshTime }}</p>

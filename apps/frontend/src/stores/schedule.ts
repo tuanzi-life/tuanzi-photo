@@ -2,8 +2,8 @@ import { defineStore } from "pinia";
 
 export const useScheduleStore = defineStore("schedule", {
   state: () => ({
-    mode: "daily" as "daily" | "interval",
-    time: "08:00",
+    mode: "timing" as "timing" | "interval",
+    hour: 8,
     intervalHours: 4,
     selectedTags: [] as string[],
     rule: "time" as "time" | "random",
