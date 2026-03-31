@@ -3,55 +3,53 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePhotoStore } from "../stores/photo";
 import MobileHeader from "../components/MobileHeader.vue";
+import MobileTabBar from "../components/MobileTabBar.vue";
+import InlineTagFilter from "../components/InlineTagFilter.vue";
 import PhotoGrid from "../components/PhotoGrid.vue";
 import EmptyState from "../components/EmptyState.vue";
 import PhotoDetailOverlay from "../components/PhotoDetailOverlay.vue";
-import TagSheet from "../components/TagSheet.vue";
-import ScheduleSheet from "../components/ScheduleSheet.vue";
+import SchedulePanel from "../components/SchedulePanel.vue";
 
 const photoStore = usePhotoStore();
-const { filteredPhotos, photos, selectedTags } = storeToRefs(photoStore);
+const { filteredPhotos, photos } = storeToRefs(photoStore);
 
-const tagSheetOpen = ref(false);
-const scheduleSheetOpen = ref(false);
+const activeTab = ref<"photos" | "schedule">("photos");
 </script>
 
 <template>
   <div class="flex flex-col h-screen overflow-hidden">
-    <MobileHeader />
+    <!-- 顶部 Header，仅照片 tab 显示 -->
+    <MobileHeader v-if="activeTab === 'photos'" />
 
-    <!-- 工具栏 -->
-    <div class="flex items-center gap-2 px-3 py-2 border-b border-default bg-default">
-      <UButton
-        size="xs"
-        color="neutral"
-        :variant="selectedTags.length > 0 ? 'solid' : 'outline'"
-        icon="i-lucide-tag"
-        @click="tagSheetOpen = true"
-      >
-        标签
-        <UBadge
-          v-if="selectedTags.length > 0"
-          :label="String(selectedTags.length)"
-          color="primary"
-          size="xs"
-          class="ml-1"
-        />
-      </UButton>
-      <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-clock" @click="scheduleSheetOpen = true">
-        定时
-      </UButton>
-      <span class="ml-auto text-xs text-muted">{{ filteredPhotos.length }}/{{ photos.length }}</span>
-    </div>
+    <!-- 主内容区 -->
+    <main class="flex-1 overflow-hidden">
+      <!-- 照片视图 -->
+      <div v-if="activeTab === 'photos'" class="flex flex-col h-full">
+        <InlineTagFilter />
+        <div class="flex items-center px-3 py-1">
+          <span class="text-xs text-muted">{{ filteredPhotos.length }}/{{ photos.length }} 张</span>
+        </div>
+        <div class="flex-1 overflow-y-auto px-3 pb-3">
+          <PhotoGrid v-if="filteredPhotos.length > 0" :photos="filteredPhotos" :columns="2" />
+          <EmptyState v-else icon="i-lucide-image" title="还没有照片" description="点击上传图片" />
+        </div>
+      </div>
 
-    <!-- 照片网格 -->
-    <main class="flex-1 overflow-y-auto p-3">
-      <PhotoGrid v-if="filteredPhotos.length > 0" :photos="filteredPhotos" :columns="2" />
-      <EmptyState v-else icon="i-lucide-image" title="还没有照片" description="点击上传图片" />
+      <!-- 定时视图 -->
+      <div v-else class="flex flex-col h-full">
+        <div class="flex items-center px-4 h-12 border-b border-default bg-default">
+          <span class="font-semibold text-sm text-highlighted">定时设置</span>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+          <SchedulePanel />
+        </div>
+      </div>
     </main>
 
+    <!-- 底部 Tab Bar -->
+    <MobileTabBar v-model="activeTab" />
+
+    <!-- 全局弹层 -->
     <PhotoDetailOverlay />
-    <TagSheet v-model:open="tagSheetOpen" />
-    <ScheduleSheet v-model:open="scheduleSheetOpen" />
   </div>
 </template>
