@@ -2,6 +2,8 @@
   "name": "tuanzi-photo",
   "private": true,
   "scripts": {
+    "build:pi": "bash ./build-on-pi.sh",
+    "run:pi": "bash ./run-on-pi.sh",
     "format": "prettier --write --no-error-on-unmatched-pattern \"apps/**/*.{ts,vue,json}\" \"packages/**/*.{ts,json}\""
   },
   "devDependencies": {
