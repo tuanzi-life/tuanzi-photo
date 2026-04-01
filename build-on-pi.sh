@@ -115,8 +115,10 @@ install_dependencies() {
 }
 
 build_frontend() {
-  log "Building frontend with low-memory profile"
-  "${PNPM_CMD[@]}" --filter frontend build:pi
+  local frontend_heap_mb="${FRONTEND_BUILD_HEAP_MB:-288}"
+
+  log "Building frontend with low-memory profile (heap=${frontend_heap_mb}MB)"
+  FRONTEND_BUILD_HEAP_MB="${frontend_heap_mb}" "${PNPM_CMD[@]}" --filter frontend build:pi
 }
 
 build_backend() {
