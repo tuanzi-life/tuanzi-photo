@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "build:pi": "bash ./scripts/build-on-pi.sh",
+    "build:frontend": "bash ./scripts/build-frontend.sh",
+    "build:backend": "bash ./scripts/build-backend.sh",
     "run:pi": "bash ./scripts/run-on-pi.sh",
-    "release": "bash ./scripts/release-frontend.sh",
     "format": "prettier --write --no-error-on-unmatched-pattern \"apps/**/*.{ts,vue,json}\" \"packages/**/*.{ts,json}\""
   },
   "devDependencies": {

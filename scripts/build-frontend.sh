@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${REPO_ROOT}"
 
 log() {
-  echo "[release-frontend] $*"
+  echo "[build-frontend] $*"
 }
 
 frontend_dist_dir="apps/frontend/dist"

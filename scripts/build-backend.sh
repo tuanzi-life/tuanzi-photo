@@ -13,7 +13,7 @@ fail() {
 }
 
 log() {
-  echo "[build-on-pi] $*"
+  echo "[build-backend] $*"
 }
 
 require_command() {

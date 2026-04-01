@@ -41,8 +41,8 @@ stop_service_if_running() {
 }
 
 run_build() {
-  log "Running build-on-pi.sh"
-  bash "${REPO_ROOT}/scripts/build-on-pi.sh"
+  log "Running build-backend.sh"
+  bash "${REPO_ROOT}/scripts/build-backend.sh"
 }
 
 install_service() {
