@@ -1,9 +1,11 @@
 {
   "name": "tuanzi-photo",
   "private": true,
+  "version": "0.1.0",
   "scripts": {
-    "build:pi": "bash ./build-on-pi.sh",
-    "run:pi": "bash ./run-on-pi.sh",
+    "build:pi": "bash ./scripts/build-on-pi.sh",
+    "run:pi": "bash ./scripts/run-on-pi.sh",
+    "release": "bash ./scripts/release-frontend.sh",
     "format": "prettier --write --no-error-on-unmatched-pattern \"apps/**/*.{ts,vue,json}\" \"packages/**/*.{ts,json}\""
   },
   "devDependencies": {

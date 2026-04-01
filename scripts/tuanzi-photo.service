@@ -8,8 +8,8 @@ Type=simple
 User=pi
 Group=pi
 SupplementaryGroups=spi gpio
-WorkingDirectory=%h/tuanzi-photo/apps/backend
-ExecStart=/usr/bin/node --max-old-space-size=128 dist/app.js
+WorkingDirectory=%h/tuanzi-photo/release
+ExecStart=/usr/bin/node --max-old-space-size=128 backend/app.js
 Restart=always
 RestartSec=3
 Environment=NODE_ENV=production

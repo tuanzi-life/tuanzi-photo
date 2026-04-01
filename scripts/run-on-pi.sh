@@ -3,9 +3,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${SCRIPT_DIR}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SERVICE_NAME="tuanzi-photo.service"
-SERVICE_SRC="${REPO_ROOT}/${SERVICE_NAME}"
+SERVICE_SRC="${REPO_ROOT}/scripts/${SERVICE_NAME}"
 SERVICE_DST="/etc/systemd/system/${SERVICE_NAME}"
 
 cd "${REPO_ROOT}"
@@ -42,7 +42,7 @@ stop_service_if_running() {
 
 run_build() {
   log "Running build-on-pi.sh"
-  bash "${REPO_ROOT}/build-on-pi.sh"
+  bash "${REPO_ROOT}/scripts/build-on-pi.sh"
 }
 
 install_service() {

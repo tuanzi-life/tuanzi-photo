@@ -31,7 +31,7 @@ await app.register(multipart, { limits: { fileSize: 50 * 1024 * 1024 } }); // 50
 
 // 生产环境托管前端构建产物
 if (env.nodeEnv === "production") {
-  const frontendDist = join(__dirname, "../../frontend/dist");
+  const frontendDist = join(__dirname, "../frontend");
   await app.register(staticFiles, {
     root: frontendDist,
     prefix: "/",

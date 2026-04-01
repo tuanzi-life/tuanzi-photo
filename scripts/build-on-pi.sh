@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${SCRIPT_DIR}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 cd "${REPO_ROOT}"
 
@@ -33,12 +33,8 @@ check_node_version() {
 
   node_version="$(node -p 'process.versions.node')"
   node_major="${node_version%%.*}"
-  node_minor="$(
-    NODE_VERSION="${node_version}" node -p '
-      const [, minor = "0"] = process.env.NODE_VERSION.split(".");
-      process.stdout.write(minor);
-    '
-  )"
+  local _rest="${node_version#*.}"
+  node_minor="${_rest%%.*}"
 
   if (( node_major < 18 || (node_major == 18 && node_minor < 12) )); then
     fail "Node.js >= 18.12 is required, current version is ${node_version}"
@@ -114,16 +110,20 @@ install_dependencies() {
     --network-concurrency="${PNPM_NETWORK_CONCURRENCY:-1}"
 }
 
-build_frontend() {
-  local frontend_heap_mb="${FRONTEND_BUILD_HEAP_MB:-288}"
-
-  log "Building frontend with low-memory profile (heap=${frontend_heap_mb}MB)"
-  FRONTEND_BUILD_HEAP_MB="${frontend_heap_mb}" "${PNPM_CMD[@]}" --filter frontend build:pi
-}
-
 build_backend() {
   log "Building backend with low-memory profile"
   "${PNPM_CMD[@]}" --filter backend build:pi
+}
+
+promote_backend() {
+  log "Promoting backend build output to release/backend"
+  rm -rf "release/backend"
+  mv "apps/backend/dist" "release/backend"
+
+  if [[ -f "apps/backend/.env" ]]; then
+    log "Copying apps/backend/.env to release/.env"
+    cp "apps/backend/.env" "release/.env"
+  fi
 }
 
 print_next_steps() {
@@ -152,7 +152,9 @@ print_next_steps() {
   echo
   echo "Next steps:"
   echo "  1. Review apps/backend/.env and set OSS credentials."
-  echo "  2. Start the server with: cd apps/backend && ${PNPM_CMD[*]} start"
+  echo "  2. Frontend artifacts are served from release/frontend/ and should arrive via git pull."
+  echo "  3. Backend artifacts have been promoted to release/backend/."
+  echo "  4. Start or restart the service with: bash ./scripts/run-on-pi.sh"
   echo
 
   if [[ "${node_env_value}" != "production" ]]; then
@@ -169,8 +171,8 @@ main() {
   ensure_production_env
   prepare_runtime_dirs
   install_dependencies
-  build_frontend
   build_backend
+  promote_backend
   print_next_steps
 }
 

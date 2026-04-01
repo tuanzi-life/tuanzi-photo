@@ -4,6 +4,7 @@
 # Build outputs
 apps/frontend/dist/
 apps/backend/dist/
+release/backend/
 
 # Data (runtime, not versioned)
 data/db/*
