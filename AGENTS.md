@@ -1,100 +1,93 @@
 # AGENTS.md
 
-This file provides guidance to **Coding Agent** when working with code in this repository.
+这个文件定义了仓库根目录级别的规则，适用于在本 monorepo 中工作的 Coding Agent。更具体的约束应写在更靠近代码目录的 `AGENTS.md` 中。
 
 ## 项目概述
 
-树莓派 Zero 2W（512MB RAM）+ E6 6色墨水屏电子相册。pnpm monorepo，前后端分离。
+这是一个运行在树莓派 Zero 2W（512MB RAM）上的 E6 6 色墨水屏电子相册项目。仓库采用 `pnpm` monorepo，前后端分离，并通过共享 TypeScript 类型包协作。
 
-## 架构
+## 仓库结构
 
+```text
+apps/frontend         Vue 3 + Vite + @nuxt/ui v4
+apps/backend          Fastify v5 + better-sqlite3 + sharp
+packages/shared-types 仅存放共享 TypeScript 类型定义
+data/                 运行时数据，不提交到版本库（db/、uploads/、cache/、logs/）
 ```
-apps/frontend   Vue 3 + Vite + @nuxt/ui v4 + @iconify/vue + vue-router v5（文件路由）
-apps/backend    Fastify v5 + better-sqlite3 + sharp
-packages/       共享库
-data/           运行时数据，不进版本控制（db/、uploads/、cache/、logs/）
-```
 
-项目使用 `pnpm workspace` 管理的 monorepo。根目录通过 `pnpm-workspace.yaml` 统一管理 `apps/*` 和 `packages/*` 下的多个 workspace package；当前主要 workspace 包包括 `frontend`、`backend` 和 `@tuanzi-photo/shared-types`。
+## Workspace 规则
 
-安装依赖时，优先进入对应 workspace 目录执行 `pnpm add <pkg>`；如果在根目录执行，则必须显式指定目标 workspace，例如：
+- monorepo 由 `pnpm-workspace.yaml` 管理，包含 `apps/*` 和 `packages/*`。
+- 安装依赖时，优先进入目标 workspace 目录执行。
+- 如果必须在仓库根目录安装依赖，必须显式指定目标 workspace：
 
 ```bash
 pnpm --filter frontend add <pkg>
 pnpm --filter backend add <pkg>
 ```
 
-**开发环境**：访问 `127.0.0.1:4011`，Vite 将 `/api/*` 代理到 `127.0.0.1:4010`
+- 不要临时创建 `shared/` 之类的共享目录。共享代码统一放在 `packages/` 下。
 
-**生产环境**：只跑 Fastify（4010），`NODE_ENV=production` 时自动用 `@fastify/static` 托管 `apps/frontend/dist/`
+## 共享包规则
 
-前端路由使用 `vue-router/vite` 插件（文件路由），页面放在 `src/pages/`，类型声明自动生成到 `src/route-map.d.ts`。
+- 共享类型定义统一放在 `packages/shared-types`。
+- 引用共享类型时，统一使用包名导入，例如 `@tuanzi-photo/shared-types`。
+- 不要通过 `../../../packages/...` 这类相对路径引用共享类型。
+- `packages/shared-types` 必须保持为纯类型包，不要放运行时常量、函数、类。如果需要共享运行时代码，应新建独立 package。
+
+## 运行时数据与部署
+
+- `data/` 是运行时状态目录，不是源码目录。不要提交 `data/` 下生成的文件。
+- 开发环境：前端运行在 `127.0.0.1:4011`，并将 `/api/*` 代理到后端 `127.0.0.1:4010`。
+- 生产环境：当 `NODE_ENV=production` 时，由 Fastify 托管 `apps/frontend/dist/` 中的前端构建产物。
 
 ## 常用命令
 
 ```bash
-# 根目录
-pnpm install          # 安装所有 workspace 依赖
-pnpm format           # prettier 格式化全项目（apps/ + packages/）
+# 仓库根目录
+pnpm install
+pnpm format
 
-# 前端 apps/frontend
-pnpm dev              # Vite dev server，端口 4011
-pnpm build            # 构建到 dist/
-pnpm typecheck        # vue-tsc 类型检查
-pnpm lint             # eslint
+# 前端 workspace
+cd apps/frontend && pnpm dev
+cd apps/frontend && pnpm build
+cd apps/frontend && pnpm typecheck
 
-# 后端 apps/backend
-pnpm dev              # tsx watch，端口 4010
-pnpm build            # tsc 编译到 dist/
-pnpm start            # 生产启动（NODE_ENV=production）
+# 后端 workspace
+cd apps/backend && pnpm dev
+cd apps/backend && pnpm build
+cd apps/backend && pnpm typecheck
+cd apps/backend && pnpm start
 ```
 
-## 关键约束
+## 验证规则
 
-- **内存**：Node.js 生产启动加 `--max-old-space-size=128`，sharp 处理完立即释放，不缓存在内存
-- **墨水屏刷新锁**：`isRefreshing` 布尔锁，刷新中返回 409 拒绝重复请求，不用队列
-- **图片处理**：上传时预处理为6色图并缓存，刷屏时直接读取缓存文件
-- **墨水屏驱动**：Python 脚本（厂商 SPI 驱动），后端通过 `child_process` 调用
+- 修改前端代码后，按 `apps/frontend/AGENTS.md` 的要求执行验证。
+- 修改后端代码后，按 `apps/backend/AGENTS.md` 的要求执行验证。
+- 修改 `packages/shared-types` 后，要同时验证它依赖的前后端应用。
+- 当改动跨多个 workspace 或涉及共享文件时，在仓库根目录执行 `pnpm format`。
 
-## 共享包约定
+## Commit Message 规范
 
-- 前后端共享代码统一放在 `packages/`，不要新建 `shared/` 这类目录
-- 共享类型包固定使用 `packages/shared-types`
-- `packages/shared-types/package.json` 的包名固定为 `@tuanzi-photo/shared-types`
-- 前后端引用共享类型时，统一使用包名导入，例如 `import type { PhotoVO } from "@tuanzi-photo/shared-types"`
-- 不要在业务代码中使用 `../../../packages/...` 这类相对路径直接引用共享类型
-- `shared-types` 只放 TypeScript 类型定义，不放运行时常量、函数、类；如需共享运行时代码，新增独立 package
+- 提交信息采用 Conventional Commits 风格，基本格式为：`<type>(<scope>): <summary>`。
+- `scope` 可选；当改动明确落在某个 workspace 或模块时，建议填写，例如 `frontend`、`backend`、`shared-types`。
+- `summary` 使用简洁明确的中文或英文祈使句，聚焦“这次提交做了什么”，不要写空泛描述，也不要以句号结尾。
+- 优先使用以下前缀：
+  - `feat`: 新功能，对应你提到的 `feature`
+  - `fix`: 缺陷修复
+  - `chore`: 杂项维护、脚手架、依赖或非业务改动
+  - `docs`: 文档变更
+  - `refactor`: 不改变外部行为的重构
+  - `test`: 测试新增或调整
+  - `build`: 构建流程、打包配置、依赖构建相关改动
+  - `ci`: CI/CD 配置改动
+  - `perf`: 性能优化
+  - `revert`: 回滚已有提交
+- 如果改动包含破坏性变更，使用 `!` 或在正文中明确标注 `BREAKING CHANGE:`。
 
-## 前端设计规范
-
-项目使用 nuxt-ui 组件库，在创建组件之前，调用 nuxt-ui skill 去了解 nuxt-ui 的组件列表。
-
-设计组件样式时要求谨慎、克制，避免上浮、缩放、大阴影等效果。
-
-在设计任何页面或组件时，需要做到兼容不同屏幕宽度。
-
-### 颜色定义
-
-为了方便统一管理颜色、主题，尽量不要直接使用 tailwindcss 的直接指定颜色的 class（例如 bg-green-500、border-amber-200 等）。
-
-应该直接使用 nuxt-ui 语义化的颜色，这样可以通过配置文件做统一调整。
-
-- `<UButton color="primary">A Button</UButton>`
-- `<p class="text-primary bg-secondary ring ring-default">`
-- 除特殊情况，最好保持此设计规则。
-
-当前 nuxt-ui 的语义化颜色：
-
-- primary：默认 green
-- secondary：默认 blue
-- success：默认 green
-- info：默认 blue
-- warning：默认 yellow
-- error：默认 red
-- neutral：默认 slate
-
-## 后端设计规范
-
-### 数据库
-
-SQLite，路径 `data/db/main.db`，使用 better-sqlite3 同步驱动。
+```text
+feat(frontend): 增加相册筛选面板
+fix(backend): 修复墨水屏刷新锁重复触发问题
+chore: 更新 pnpm workspace 配置
+docs: 补充树莓派部署说明
+```
