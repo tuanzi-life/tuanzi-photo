@@ -1,18 +1,8 @@
+import { DB_DIR, paths } from "#paths";
 import fp from "fastify-plugin";
 import Database from "better-sqlite3";
 import { mkdirSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import type { FastifyInstance } from "fastify";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DB_PATH = resolve(__dirname, "../../../../data/db/main.db");
-// 开发时 __dirname = src/plugins，生产时 __dirname = dist/plugins
-// 开发时 sql 在 apps/backend/sql（../../sql），生产时构建脚本复制到 dist/sql（../sql）
-const SCHEMA_PATH =
-  process.env.NODE_ENV === "production"
-    ? resolve(__dirname, "../sql/schema.sql")
-    : resolve(__dirname, "../../sql/schema.sql");
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -22,15 +12,15 @@ declare module "fastify" {
 
 export default fp(async function dbPlugin(fastify: FastifyInstance) {
   // 确保 data/db 目录存在
-  mkdirSync(dirname(DB_PATH), { recursive: true });
+  mkdirSync(DB_DIR, { recursive: true });
 
-  const db = new Database(DB_PATH);
+  const db = new Database(paths.dbFile);
 
   // 开启外键约束
   db.pragma("foreign_keys = ON");
 
   // 初始化表结构（幂等）
-  const schema = readFileSync(SCHEMA_PATH, "utf-8");
+  const schema = readFileSync(paths.schemaFile, "utf-8");
   db.exec(schema);
 
   // 迁移：为旧版 photo 表补充 object_key 列

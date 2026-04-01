@@ -120,6 +120,10 @@ promote_backend() {
   rm -rf "release/backend"
   mv "apps/backend/dist" "release/backend"
 
+  # package.json is needed in release/backend so Node.js can resolve the
+  # `imports` field (e.g. "#paths") at runtime.
+  cp "apps/backend/package.json" "release/backend/package.json"
+
   if [[ -f "apps/backend/.env" ]]; then
     log "Copying apps/backend/.env to release/.env"
     cp "apps/backend/.env" "release/.env"

@@ -1,21 +1,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { paths } from "#paths";
 import { env } from "../env.js";
 import { getPhotoProcessURL } from "./oss.service.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-// 开发时 __dirname = src/services，../../ = apps/backend
-// 生产时 __dirname = dist/services，../../ = apps/backend
-const backendRoot = resolve(__dirname, "../..");
-// 开发时 driver 在 apps/backend/driver，生产时构建脚本复制到 apps/backend/dist/driver
-const driverBase =
-  env.nodeEnv === "production"
-    ? resolve(backendRoot, "dist/driver")
-    : resolve(backendRoot, "driver");
-const renderScriptPath = resolve(driverBase, "waveshare/render_photo.py");
-const cacheDir = resolve(backendRoot, "../../data/cache");
+const renderScriptPath = resolve(paths.driverDir, "waveshare/render_photo.py");
 const defaultPythonBin = env.epd.pythonBin;
 const renderTimeoutMs = env.epd.renderTimeoutMs;
 
@@ -34,8 +24,8 @@ export async function displayPhoto(objectKey: string): Promise<void> {
 
     // 下载到 data/cache 目录
     const cacheFileName = objectKey.replace(/\//g, "_");
-    await mkdir(cacheDir, { recursive: true });
-    const localFilePath = resolve(cacheDir, cacheFileName);
+    await mkdir(paths.cacheDir, { recursive: true });
+    const localFilePath = resolve(paths.cacheDir, cacheFileName);
     await downloadToFile(processedUrl, localFilePath);
 
     await runRenderProcess(localFilePath);
