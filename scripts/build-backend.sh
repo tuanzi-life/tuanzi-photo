@@ -131,7 +131,8 @@ install_driver_deps() {
   log "Installing Python driver dependencies"
   pip3 install -e "${driver_dir}" \
     --quiet \
-    --disable-pip-version-check
+    --disable-pip-version-check \
+    --break-system-packages
 }
 
 promote_backend() {

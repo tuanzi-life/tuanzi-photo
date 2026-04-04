@@ -9,7 +9,7 @@ User=pi
 Group=pi
 SupplementaryGroups=spi gpio
 WorkingDirectory=%h/tuanzi-photo/release
-ExecStart=/usr/bin/node --max-old-space-size=128 backend/app.js
+ExecStart=__NODE_BIN__ --max-old-space-size=128 backend/app.js
 Restart=always
 RestartSec=3
 Environment=NODE_ENV=production

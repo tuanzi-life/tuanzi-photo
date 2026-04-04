@@ -46,8 +46,19 @@ run_build() {
 }
 
 install_service() {
-  log "Installing ${SERVICE_NAME} to ${SERVICE_DST}"
-  sudo install -m 644 "${SERVICE_SRC}" "${SERVICE_DST}"
+  local node_bin
+  node_bin="$(command -v node 2>/dev/null || true)"
+  [[ -n "${node_bin}" ]] || fail "Cannot find node binary; ensure Node.js is on PATH"
+
+  log "Using node at ${node_bin}"
+
+  local tmp_service
+  tmp_service="$(mktemp)"
+  sed "s|__NODE_BIN__|${node_bin}|g" "${SERVICE_SRC}" > "${tmp_service}"
+  sudo install -m 644 "${tmp_service}" "${SERVICE_DST}"
+  rm -f "${tmp_service}"
+
+  log "Installed ${SERVICE_NAME} to ${SERVICE_DST}"
 }
 
 reload_and_restart_service() {
