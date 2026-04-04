@@ -32,7 +32,7 @@ import logging
 from . import epdconfig
 
 import PIL
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageOps
 import io
 
 # Display resolution
@@ -192,8 +192,19 @@ class EPD:
         else:
             logger.warning("Invalid image dimensions: %d x %d, expected %d x %d" % (imwidth, imheight, self.width, self.height))
 
+        # tuanzi-photo 自定义轻量预处理再量化，改善照片整体偏暗但不改黑白和彩色的量化锚点。
+        # autocontrast(cutoff=0)：自动拉伸明暗范围；cutoff 越小，保留越多高光和阴影细节，整体更通透。
+        # brightness(1.08)：整体亮度倍率；值越大整张图越亮，过高会让浅色区域发白。
+        # contrast(1.05)：整体对比度倍率；值越大明暗分离越明显，过高会让暗部边缘变硬。
+        # color(1.08)：整体色彩饱和度倍率；值越大彩色更容易量化到红黄蓝绿，过高会让颜色块更突兀。
+        image_preprocessed = image_temp.convert("RGB")
+        image_preprocessed = ImageOps.autocontrast(image_preprocessed, cutoff=0)
+        image_preprocessed = ImageEnhance.Brightness(image_preprocessed).enhance(1.08)
+        image_preprocessed = ImageEnhance.Contrast(image_preprocessed).enhance(1.05)
+        image_preprocessed = ImageEnhance.Color(image_preprocessed).enhance(1.08)
+
         # Convert the soruce image to the 6 colors, dithering if needed
-        image_6color = image_temp.convert("RGB").quantize(palette=pal_image)
+        image_6color = image_preprocessed.quantize(palette=pal_image)
         buf_6color = bytearray(image_6color.tobytes('raw'))
 
         # PIL does not support 4 bit color, so pack the 4 bits of color
