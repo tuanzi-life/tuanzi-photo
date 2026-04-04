@@ -12,6 +12,7 @@ WorkingDirectory=__WORKING_DIR__
 ExecStart=__NODE_BIN__ --max-old-space-size=128 backend/app.js
 Restart=always
 RestartSec=3
+TimeoutStopSec=200
 Environment=NODE_ENV=production
 
 [Install]

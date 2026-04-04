@@ -57,3 +57,17 @@ if (env.nodeEnv === "production") {
 }
 
 await app.listen({ port: env.port, host: env.host });
+
+const shutdown = async (signal: string) => {
+  app.log.info(`Received ${signal}, shutting down gracefully`);
+  await app.close();
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => {
+  void shutdown("SIGTERM");
+});
+
+process.on("SIGINT", () => {
+  void shutdown("SIGINT");
+});

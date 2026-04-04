@@ -115,6 +115,19 @@ build_backend() {
   "${PNPM_CMD[@]}" --filter backend build:pi
 }
 
+deploy_backend() {
+  local deploy_dir="release/.backend-deploy"
+
+  log "Deploying production dependencies via pnpm deploy"
+  rm -rf "${deploy_dir}"
+  NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--max-old-space-size=192" \
+    "${PNPM_CMD[@]}" deploy --legacy --filter backend --prod "${deploy_dir}"
+
+  rm -rf "release/backend/node_modules"
+  mv "${deploy_dir}/node_modules" "release/backend/node_modules"
+  rm -rf "${deploy_dir}"
+}
+
 install_driver_deps() {
   local driver_dir="release/backend/driver/waveshare"
 
@@ -139,10 +152,6 @@ promote_backend() {
   log "Promoting backend build output to release/backend"
   rm -rf "release/backend"
   mv "apps/backend/dist" "release/backend"
-
-  # package.json is needed in release/backend so Node.js can resolve the
-  # `imports` field (e.g. "#paths") at runtime.
-  cp "apps/backend/package.json" "release/backend/package.json"
 
   if [[ -f "apps/backend/.env" ]]; then
     log "Copying apps/backend/.env to release/.env"
@@ -197,6 +206,7 @@ main() {
   install_dependencies
   build_backend
   promote_backend
+  deploy_backend
   install_driver_deps
   print_next_steps
 }

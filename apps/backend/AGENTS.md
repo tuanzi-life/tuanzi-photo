@@ -34,7 +34,6 @@
 pnpm dev
 pnpm build
 pnpm typecheck
-pnpm start
 ```
 
 ## 验证规则
