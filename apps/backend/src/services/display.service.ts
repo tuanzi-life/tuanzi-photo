@@ -1,13 +1,15 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, stat, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { paths } from "#paths";
 import { env } from "../env.js";
-import { getPhotoProcessURL } from "./oss.service.js";
+import { getPhotoProcessURL, getPhotoInfo } from "./oss.service.js";
 
 const renderScriptPath = resolve(paths.driverDir, "waveshare/render_photo.py");
 const defaultPythonBin = env.epd.pythonBin;
 const renderTimeoutMs = env.epd.renderTimeoutMs;
+const landscapeSize = { width: 800, height: 480 } as const;
+const portraitSize = { width: 480, height: 800 } as const;
 
 let isRefreshing = false;
 
@@ -19,20 +21,73 @@ export async function displayPhoto(objectKey: string): Promise<void> {
   isRefreshing = true;
 
   try {
+    await mkdir(paths.cacheDir, { recursive: true });
+    const landscapeCachePath = getCacheFilePath(objectKey, landscapeSize.width, landscapeSize.height);
+    const portraitCachePath = getCacheFilePath(objectKey, portraitSize.width, portraitSize.height);
+
+    const hasLandscapeCache = await hasCachedRenderFile(landscapeCachePath);
+    const hasPortraitCache = await hasCachedRenderFile(portraitCachePath);
+
+    if (hasLandscapeCache && !hasPortraitCache) {
+      await runRenderProcess(landscapeCachePath);
+      return;
+    }
+
+    if (hasPortraitCache && !hasLandscapeCache) {
+      await runRenderProcess(portraitCachePath);
+      return;
+    }
+
+    const photoInfo = await getPhotoInfo(objectKey);
+    const targetSize = getTargetRenderSize(photoInfo.imageWidth, photoInfo.imageHeight);
+    const localFilePath = getCacheFilePath(objectKey, targetSize.width, targetSize.height);
+
+    if (await hasCachedRenderFile(localFilePath)) {
+      await runRenderProcess(localFilePath);
+      return;
+    }
+
     const processedUrl = await getPhotoProcessURL(
       objectKey,
-      "image/resize,m_fill,w_800,h_480/format,bmp"
+      `image/resize,m_fill,w_${targetSize.width},h_${targetSize.height}/format,bmp`
     );
 
     // 下载到 data/cache 目录
-    const cacheFileName = objectKey.replace(/\//g, "_").replace(/\.[^.]+$/, ".bmp");
-    await mkdir(paths.cacheDir, { recursive: true });
-    const localFilePath = resolve(paths.cacheDir, cacheFileName);
     await downloadToFile(processedUrl, localFilePath);
 
     await runRenderProcess(localFilePath);
   } finally {
     isRefreshing = false;
+  }
+}
+
+function getCacheFilePath(objectKey: string, width: number, height: number): string {
+  const cacheFileName = objectKey
+    .replace(/\//g, "_")
+    .replace(/\.[^.]+$/, `_${width}x${height}.bmp`);
+  return resolve(paths.cacheDir, cacheFileName);
+}
+
+function getTargetRenderSize(
+  imageWidth: string,
+  imageHeight: string
+): { width: number; height: number } {
+  const width = Number(imageWidth);
+  const height = Number(imageHeight);
+
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    throw new Error(`照片尺寸无效: width=${imageWidth}, height=${imageHeight}`);
+  }
+
+  return width >= height ? landscapeSize : portraitSize;
+}
+
+async function hasCachedRenderFile(localFilePath: string): Promise<boolean> {
+  try {
+    const fileStat = await stat(localFilePath);
+    return fileStat.isFile() && fileStat.size > 0;
+  } catch {
+    return false;
   }
 }
 

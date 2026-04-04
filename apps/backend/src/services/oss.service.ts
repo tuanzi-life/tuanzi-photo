@@ -49,3 +49,32 @@ export async function getPhotoProcessURL(
   const client = getOSSClient();
   return client.signatureUrl(objectKey, { process: style, expires: 3600 });
 }
+
+/**
+ * 获取照片信息
+ * @param objectKey object key
+ * @returns
+ */
+export async function getPhotoInfo(objectKey: string): Promise<{
+  fileSize: string;
+  format: string;
+  frameCount: string;
+  imageHeight: string;
+  imageWidth: string;
+  resolutionUnit: string;
+  xResolution: string;
+  yResolution: string;
+}> {
+  const url = await getPhotoProcessURL(objectKey, "image/info");
+  const response = await (await fetch(url)).json();
+  return {
+    fileSize: response.FileSize.value,
+    format: response.Format.value,
+    frameCount: response.FrameCount.value,
+    imageHeight: response.ImageHeight.value,
+    imageWidth: response.ImageWidth.value,
+    resolutionUnit: response.ResolutionUnit.value,
+    xResolution: response.XResolution.value,
+    yResolution: response.YResolution.value,
+  };
+}
