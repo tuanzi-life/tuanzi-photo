@@ -45,6 +45,20 @@ run_build() {
   bash "${REPO_ROOT}/scripts/build-backend.sh"
 }
 
+move_node_modules() {
+  local src="apps/backend/node_modules"
+  local dst="release/backend/node_modules"
+
+  if [[ ! -d "${src}" ]]; then
+    log "apps/backend/node_modules not found, skipping"
+    return
+  fi
+
+  log "Moving node_modules to release/backend"
+  rm -rf "${dst}"
+  mv "${src}" "${dst}"
+}
+
 install_service() {
   local node_bin
   node_bin="$(command -v node 2>/dev/null || true)"
@@ -87,6 +101,7 @@ main() {
   check_service_template
   stop_service_if_running
   run_build
+  move_node_modules
   install_service
   reload_and_restart_service
   show_status

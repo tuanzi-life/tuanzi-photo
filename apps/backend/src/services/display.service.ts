@@ -19,11 +19,13 @@ export async function displayPhoto(objectKey: string): Promise<void> {
   isRefreshing = true;
 
   try {
-    // 获取 OSS 处理后的图片 URL（固定缩放参数，未来按实际图片尺寸调整）
-    const processedUrl = await getPhotoProcessURL(objectKey, "image/resize,w_100,h_100");
+    const processedUrl = await getPhotoProcessURL(
+      objectKey,
+      "image/resize,m_fill,w_800,h_480/format,bmp"
+    );
 
     // 下载到 data/cache 目录
-    const cacheFileName = objectKey.replace(/\//g, "_");
+    const cacheFileName = objectKey.replace(/\//g, "_").replace(/\.[^.]+$/, ".bmp");
     await mkdir(paths.cacheDir, { recursive: true });
     const localFilePath = resolve(paths.cacheDir, cacheFileName);
     await downloadToFile(processedUrl, localFilePath);
