@@ -115,6 +115,25 @@ build_backend() {
   "${PNPM_CMD[@]}" --filter backend build:pi
 }
 
+install_driver_deps() {
+  local driver_dir="release/backend/driver/waveshare"
+
+  if [[ ! -d "${driver_dir}" ]]; then
+    log "Driver directory not found at ${driver_dir}, skipping pip install"
+    return
+  fi
+
+  if ! command -v pip3 >/dev/null 2>&1; then
+    log "pip3 not found, skipping driver dependency installation"
+    return
+  fi
+
+  log "Installing Python driver dependencies"
+  pip3 install -e "${driver_dir}" \
+    --quiet \
+    --disable-pip-version-check
+}
+
 promote_backend() {
   log "Promoting backend build output to release/backend"
   rm -rf "release/backend"
@@ -177,6 +196,7 @@ main() {
   install_dependencies
   build_backend
   promote_backend
+  install_driver_deps
   print_next_steps
 }
 
