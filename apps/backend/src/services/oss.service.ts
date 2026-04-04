@@ -61,9 +61,9 @@ export async function getPhotoInfo(objectKey: string): Promise<{
   frameCount: string;
   imageHeight: string;
   imageWidth: string;
-  resolutionUnit: string;
-  xResolution: string;
-  yResolution: string;
+  resolutionUnit?: string;
+  xResolution?: string;
+  yResolution?: string;
 }> {
   const url = await getPhotoProcessURL(objectKey, "image/info");
   const response = await (await fetch(url)).json();
@@ -73,8 +73,8 @@ export async function getPhotoInfo(objectKey: string): Promise<{
     frameCount: response.FrameCount.value,
     imageHeight: response.ImageHeight.value,
     imageWidth: response.ImageWidth.value,
-    resolutionUnit: response.ResolutionUnit.value,
-    xResolution: response.XResolution.value,
-    yResolution: response.YResolution.value,
+    resolutionUnit: response.ResolutionUnit?.value,
+    xResolution: response.XResolution?.value,
+    yResolution: response.YResolution?.value,
   };
 }
