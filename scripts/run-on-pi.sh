@@ -54,7 +54,10 @@ install_service() {
 
   local tmp_service
   tmp_service="$(mktemp)"
-  sed "s|__NODE_BIN__|${node_bin}|g" "${SERVICE_SRC}" > "${tmp_service}"
+  sed \
+    -e "s|__NODE_BIN__|${node_bin}|g" \
+    -e "s|__WORKING_DIR__|${REPO_ROOT}/release|g" \
+    "${SERVICE_SRC}" > "${tmp_service}"
   sudo install -m 644 "${tmp_service}" "${SERVICE_DST}"
   rm -f "${tmp_service}"
 
