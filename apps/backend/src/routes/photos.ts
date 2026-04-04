@@ -2,6 +2,7 @@ import { extname } from "node:path";
 import { unlink } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
+import sharp from "sharp";
 import {
   listPhotos,
   getPhotoObjectKeyById,
@@ -41,10 +42,15 @@ export default async function photosRoutes(fastify: FastifyInstance) {
     "/photos/upload",
     async (request): Promise<ApiResponse<PhotoVO | null>> => {
       const files = await request.saveRequestFiles();
+      const extraTempFilePaths = new Set<string>();
 
       // 清理所有文件的辅助函数，确保不泄漏临时文件
       const cleanupAll = () =>
-        Promise.all(files.map((f) => unlink(f.filepath).catch(() => {})));
+        Promise.all(
+          [...files.map((f) => f.filepath), ...extraTempFilePaths].map((filepath) =>
+            unlink(filepath).catch(() => {})
+          )
+        );
 
       if (!files.length) {
         return err(400, "请上传文件");
@@ -75,7 +81,11 @@ export default async function photosRoutes(fastify: FastifyInstance) {
       const objectKey = `photos/${Date.now()}-${randomBytes(4).toString("hex")}${ext}`;
 
       try {
-        const success = await uploadPhotoToOSS(filepath, objectKey);
+        const normalizedFilePath = `${filepath}-normalized${ext}`;
+        extraTempFilePaths.add(normalizedFilePath);
+        await normalizePhotoOrientation(filepath, normalizedFilePath);
+
+        const success = await uploadPhotoToOSS(normalizedFilePath, objectKey);
         if (!success) {
           return err(500, "上传 OSS 失败");
         }
@@ -149,4 +159,11 @@ export default async function photosRoutes(fastify: FastifyInstance) {
       return ok(null);
     }
   );
+}
+
+async function normalizePhotoOrientation(
+  sourcePath: string,
+  outputPath: string
+): Promise<void> {
+  await sharp(sourcePath).rotate().toFile(outputPath);
 }

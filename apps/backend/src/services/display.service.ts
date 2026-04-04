@@ -22,8 +22,16 @@ export async function displayPhoto(objectKey: string): Promise<void> {
 
   try {
     await mkdir(paths.cacheDir, { recursive: true });
-    const landscapeCachePath = getCacheFilePath(objectKey, landscapeSize.width, landscapeSize.height);
-    const portraitCachePath = getCacheFilePath(objectKey, portraitSize.width, portraitSize.height);
+    const landscapeCachePath = getCacheFilePath(
+      objectKey,
+      landscapeSize.width,
+      landscapeSize.height
+    );
+    const portraitCachePath = getCacheFilePath(
+      objectKey,
+      portraitSize.width,
+      portraitSize.height
+    );
 
     const hasLandscapeCache = await hasCachedRenderFile(landscapeCachePath);
     const hasPortraitCache = await hasCachedRenderFile(portraitCachePath);
@@ -39,8 +47,15 @@ export async function displayPhoto(objectKey: string): Promise<void> {
     }
 
     const photoInfo = await getPhotoInfo(objectKey);
+    console.log(
+      `照片信息: width=${photoInfo.imageWidth} height=${photoInfo.imageHeight}`
+    );
     const targetSize = getTargetRenderSize(photoInfo.imageWidth, photoInfo.imageHeight);
-    const localFilePath = getCacheFilePath(objectKey, targetSize.width, targetSize.height);
+    const localFilePath = getCacheFilePath(
+      objectKey,
+      targetSize.width,
+      targetSize.height
+    );
 
     if (await hasCachedRenderFile(localFilePath)) {
       await runRenderProcess(localFilePath);
