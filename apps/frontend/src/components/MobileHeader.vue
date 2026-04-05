@@ -42,7 +42,7 @@ async function onFileChange(event: Event) {
         v-if="batteryStore.percent !== null"
         class="flex items-center gap-1 text-[11px] text-muted"
       >
-        <UIcon name="i-lucide-battery-medium" class="size-3.5" />
+        <UIcon :name="batteryStore.iconName" class="size-3.5" />
         <span>{{ batteryStore.percent }}%</span>
       </div>
       <UButton color="primary" size="xs" :loading="uploading" @click="triggerUpload">

@@ -67,6 +67,11 @@ class INA219:
         self._power_lsb = 0
         self.set_calibration_16V_5A()
 
+    def _to_signed(self, value):
+        if value >= 0x8000:
+            value -= 0x10000
+        return value
+
     def read(self,address):
         data = self.bus.read_i2c_block_data(self.addr, address, 2)
         return ((data[0] * 256 ) + data[1])
@@ -165,9 +170,7 @@ class INA219:
 
     def getShuntVoltage_mV(self):
         self.write(_REG_CALIBRATION,self._cal_value)
-        value = self.read(_REG_SHUNTVOLTAGE)
-        if value > 32767:
-            value -= 65535
+        value = self._to_signed(self.read(_REG_SHUNTVOLTAGE))
         return value * 0.01
 
     def getBusVoltage_V(self):
@@ -176,16 +179,12 @@ class INA219:
         return (self.read(_REG_BUSVOLTAGE) >> 3) * 0.004
 
     def getCurrent_mA(self):
-        value = self.read(_REG_CURRENT)
-        if value > 32767:
-            value -= 65535
+        value = self._to_signed(self.read(_REG_CURRENT))
         return value * self._current_lsb
 
     def getPower_W(self):
         self.write(_REG_CALIBRATION,self._cal_value)
-        value = self.read(_REG_POWER)
-        if value > 32767:
-            value -= 65535
+        value = self._to_signed(self.read(_REG_POWER))
         return value * self._power_lsb
         
 if __name__=='__main__':
