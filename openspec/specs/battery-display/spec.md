@@ -1,18 +1,18 @@
 ## ADDED Requirements
 
-### Requirement: battery store 持有电量状态并提供轮询
+### Requirement: battery store 持有电量与状态并提供轮询
 
-系统 SHALL 提供 `stores/battery.ts` Pinia store，持有 `percent: number | null` 状态（null 表示尚未获取或不可用）。Store SHALL 提供 `fetchBattery()` action 和 `startPolling()` action。
+系统 SHALL 提供 `stores/battery.ts` Pinia store，持有 `percent: number | null` 和 `status: BatteryStatus | null` 状态（null 表示尚未获取或不可用）。Store SHALL 提供 `fetchBattery()` action、`startPolling()` action 和一个基于状态返回图标名的 getter。
 
 #### Scenario: 首次加载获取电量
 
 - **WHEN** `fetchBattery()` 被调用且 API 返回成功
-- **THEN** `percent` 更新为返回的数值，类型为 number
+- **THEN** `percent` 更新为返回的整数百分比，`status` 更新为返回的状态值
 
 #### Scenario: API 失败时静默降级
 
 - **WHEN** `fetchBattery()` 被调用但 `/api/v1/battery` 返回非 0 code 或网络错误
-- **THEN** `percent` 保持不变（不重置为 null，不弹 toast），错误被静默吞掉
+- **THEN** `percent` 与 `status` 保持不变（不重置为 null，不弹 toast），错误被静默吞掉
 
 ### Requirement: 轮询每 10 秒自动刷新电量
 
@@ -42,21 +42,26 @@
 - **WHEN** DesktopLayout 或 MobileLayout 卸载
 - **THEN** interval 被清除，不再发起请求
 
-### Requirement: AppHeader 显示电量指示器
+### Requirement: AppHeader 根据状态显示电量指示器
 
-系统 SHALL 在 `AppHeader.vue` 中接入 battery store，当 `percent !== null` 时在 header 右侧上传按钮左边显示电量图标（`i-lucide-battery-medium`）和 `{percent}%` 文字，当 `percent === null` 时不渲染该区域。
+系统 SHALL 在 `AppHeader.vue` 中接入 battery store，当 `percent !== null` 时在 header 右侧上传按钮左边显示电量图标和 `{percent}%` 文字。当 `status === "charging"` 时 SHALL 使用充电图标；当 `status === "full"` 时 SHALL 使用满电图标；其余状态 SHALL 使用默认电池图标。当 `percent === null` 时不渲染该区域。
 
 #### Scenario: 电量数据可用时显示
 
 - **WHEN** `batteryStore.percent` 为有效数字
 - **THEN** Header 右侧显示电量图标和百分比文字
 
+#### Scenario: 充电中显示专用图标
+
+- **WHEN** `batteryStore.status` 为 `charging`
+- **THEN** Header 使用 `i-lucide-battery-charging` 图标
+
 #### Scenario: 电量数据不可用时隐藏
 
 - **WHEN** `batteryStore.percent` 为 null（开发环境或硬件异常）
 - **THEN** Header 不显示电量相关 UI，布局不受影响
 
-### Requirement: MobileHeader 显示电量指示器
+### Requirement: MobileHeader 根据状态显示电量指示器
 
 系统 SHALL 在 `MobileHeader.vue` 中以与 AppHeader 相同的逻辑显示电量指示器，样式保持紧凑（适配 h-12 移动端 header）。
 
@@ -64,6 +69,11 @@
 
 - **WHEN** `batteryStore.percent` 为有效数字
 - **THEN** MobileHeader 右侧动作区中显示小尺寸电量图标和百分比
+
+#### Scenario: 移动端充电中显示专用图标
+
+- **WHEN** `batteryStore.status` 为 `charging`
+- **THEN** MobileHeader 使用 `i-lucide-battery-charging` 图标
 
 #### Scenario: 移动端电量数据不可用时隐藏
 
