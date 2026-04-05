@@ -10,6 +10,10 @@ import {
   deletePhoto,
 } from "../services/photo.service.js";
 import { uploadPhotoToOSS, deletePhotoFromOSS } from "../services/oss.service.js";
+import {
+  recordRenderFailure,
+  recordRenderSuccess,
+} from "../services/render-history.service.js";
 import { ok, err } from "../utils/response.js";
 import type { ApiResponse, PhotoListResponse, PhotoVO } from "@tuanzi-photo/shared-types";
 
@@ -152,13 +156,36 @@ export default async function photosRoutes(fastify: FastifyInstance) {
         return err(404, "照片不存在");
       }
 
-      fastify.screen.pushPhoto(objectKey).catch((e: Error) => {
-        fastify.log.error({ err: e }, "墨水屏推送失败");
-      });
+      void pushPhotoWithManualHistory(fastify, id, objectKey);
 
       return ok(null);
     }
   );
+}
+
+async function pushPhotoWithManualHistory(
+  fastify: FastifyInstance,
+  photoId: number,
+  objectKey: string
+): Promise<void> {
+  try {
+    await fastify.screen.pushPhoto(objectKey);
+  } catch (error) {
+    try {
+      recordRenderFailure(fastify.db, photoId, "manual", error);
+    } catch (historyError) {
+      fastify.log.error({ err: historyError, photoId }, "手动渲染失败记录写入失败");
+    }
+
+    fastify.log.error({ err: error, photoId }, "墨水屏推送失败");
+    return;
+  }
+
+  try {
+    await recordRenderSuccess(fastify.db, photoId, "manual", fastify.log);
+  } catch (historyError) {
+    fastify.log.error({ err: historyError, photoId }, "手动渲染成功记录写入失败");
+  }
 }
 
 async function normalizePhotoOrientation(

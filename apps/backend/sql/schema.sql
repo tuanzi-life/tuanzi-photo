@@ -31,6 +31,15 @@ create table if not exists schedule (
   updated_at integer not null default (unixepoch())
 );
 
+-- 渲染历史表
+create table if not exists render_history (
+  id integer primary key,
+  time integer not null default (unixepoch()),
+  photo_id integer not null,
+  type text not null check (type in ('manual', 'schedule')),
+  result text not null
+);
+
 ------------------------------------------------
 --  注意：SQLite 的外键默认是关闭的，每次连接需要手动开启：
 --  pragma foreign_keys = on;

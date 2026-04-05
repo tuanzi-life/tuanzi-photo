@@ -1,4 +1,4 @@
-import { DB_DIR, paths } from "#paths";
+import { DB_DIR, MAIN_DIR, paths } from "#paths";
 import fp from "fastify-plugin";
 import Database from "better-sqlite3";
 import { mkdirSync, readFileSync } from "node:fs";
@@ -11,8 +11,9 @@ declare module "fastify" {
 }
 
 export default fp(async function dbPlugin(fastify: FastifyInstance) {
-  // 确保 data/db 目录存在
+  // 确保运行时目录存在
   mkdirSync(DB_DIR, { recursive: true });
+  mkdirSync(MAIN_DIR, { recursive: true });
 
   const db = new Database(paths.dbFile);
 

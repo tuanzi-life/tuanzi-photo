@@ -1,5 +1,6 @@
 import type Database from "better-sqlite3";
 import type { ScheduleVO, UpdateScheduleBody } from "@tuanzi-photo/shared-types";
+import { getRenderCountTotals } from "./render-history.service.js";
 
 interface ScheduleRow {
   id: number;
@@ -68,42 +69,66 @@ export function upsertSchedule(
   return getSchedule(db);
 }
 
-export function pickPhotoForRefresh(
+interface CandidatePhotoRow {
+  id: number;
+  created_at: number;
+}
+
+export async function pickPhotoForRefresh(
   db: Database.Database,
   schedule: ScheduleVO
-): number | null {
-  const tags = schedule.relatedTags;
-  let photoId: number | null = null;
-
-  if (tags.length === 0) {
-    if (schedule.refreshRule === "random") {
-      const row = db.prepare("select id from photo order by random() limit 1").get() as
-        | { id: number }
-        | undefined;
-      photoId = row?.id ?? null;
-    } else {
-      const row = db
-        .prepare("select id from photo order by created_at asc limit 1")
-        .get() as { id: number } | undefined;
-      photoId = row?.id ?? null;
-    }
-  } else {
-    // 多标签取并集：照片拥有任意一个指定标签即可
-    const placeholders = tags.map(() => "?").join(", ");
-    const orderBy = schedule.refreshRule === "random" ? "random()" : "p.created_at asc";
-    const row = db
-      .prepare(
-        `select distinct p.id from photo p
-         join photo_tag pt on pt.photo_id = p.id
-         join tag t on t.id = pt.tag_id
-         where t.name in (${placeholders})
-         order by ${orderBy} limit 1`
-      )
-      .get(...tags) as { id: number } | undefined;
-    photoId = row?.id ?? null;
+): Promise<number | null> {
+  const candidates = listCandidatePhotos(db, schedule.relatedTags);
+  if (candidates.length === 0) {
+    return null;
   }
 
-  return photoId;
+  const totals = await getRenderCountTotals(
+    db,
+    candidates.map((candidate) => candidate.id)
+  );
+
+  let minRenderCount = Number.POSITIVE_INFINITY;
+  const minCandidates: CandidatePhotoRow[] = [];
+
+  for (const candidate of candidates) {
+    const renderCount = totals.get(candidate.id) ?? 0;
+
+    if (renderCount < minRenderCount) {
+      minRenderCount = renderCount;
+      minCandidates.length = 0;
+      minCandidates.push(candidate);
+      continue;
+    }
+
+    if (renderCount === minRenderCount) {
+      minCandidates.push(candidate);
+    }
+  }
+
+  if (minCandidates.length === 0) {
+    return null;
+  }
+
+  if (schedule.refreshRule === "time") {
+    minCandidates.sort((left, right) => left.created_at - right.created_at);
+    return minCandidates[0]?.id ?? null;
+  }
+
+  const index = Math.floor(Math.random() * minCandidates.length);
+  return minCandidates[index]?.id ?? null;
+}
+
+export function shouldTriggerNow(schedule: ScheduleVO, now = new Date()): boolean {
+  if (now.getMinutes() !== 0) {
+    return false;
+  }
+
+  if (schedule.refreshMode === "timing") {
+    return now.getHours() === schedule.timingHour;
+  }
+
+  return now.getHours() % schedule.intervalHours === 0;
 }
 
 export function calcNextRefreshTime(schedule: ScheduleVO): number {
@@ -117,8 +142,36 @@ export function calcNextRefreshTime(schedule: ScheduleVO): number {
     }
     return Math.floor(next.getTime() / 1000);
   } else {
-    return Math.floor(now.getTime() / 1000) + schedule.intervalHours * 3600;
+    const next = new Date(now);
+    next.setMinutes(0, 0, 0);
+
+    do {
+      next.setHours(next.getHours() + 1);
+    } while (next.getHours() % schedule.intervalHours !== 0);
+
+    return Math.floor(next.getTime() / 1000);
   }
+}
+
+function listCandidatePhotos(
+  db: Database.Database,
+  tags: string[]
+): CandidatePhotoRow[] {
+  if (tags.length === 0) {
+    return db
+      .prepare("select id, created_at from photo")
+      .all() as CandidatePhotoRow[];
+  }
+
+  const placeholders = tags.map(() => "?").join(", ");
+  return db
+    .prepare(
+      `select distinct p.id, p.created_at from photo p
+       join photo_tag pt on pt.photo_id = p.id
+       join tag t on t.id = pt.tag_id
+       where t.name in (${placeholders})`
+    )
+    .all(...tags) as CandidatePhotoRow[];
 }
 
 function rowToVO(row: ScheduleRow): ScheduleVO {
