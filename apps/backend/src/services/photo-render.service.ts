@@ -13,7 +13,7 @@ const portraitSize = { width: 480, height: 800 } as const;
 
 let isRefreshing = false;
 
-export async function displayPhoto(objectKey: string): Promise<void> {
+export async function renderPhoto(objectKey: string): Promise<void> {
   // 在最开始就抢锁，避免并发窗口
   if (isRefreshing) {
     throw new Error("墨水屏正在刷新，请稍后再试");
@@ -184,6 +184,6 @@ function runRenderProcess(localFilePath: string): Promise<void> {
   });
 }
 
-export function getDisplayRefreshState(): boolean {
+export function getRenderRefreshState(): boolean {
   return isRefreshing;
 }

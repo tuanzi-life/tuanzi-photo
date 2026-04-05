@@ -22,5 +22,5 @@
 
 #### Scenario: Python 渲染脚本路径可达
 
-- **WHEN** 生产环境启动并调用 `displayPhoto()`
+- **WHEN** 生产环境启动并调用 `renderPhoto()`
 - **THEN** `renderScriptPath` 指向 `release/backend/driver/waveshare/render_photo.py`，`cwd` 为该脚本所在目录，Python 进程可正常启动

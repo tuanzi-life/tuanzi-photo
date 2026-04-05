@@ -24,20 +24,6 @@ export default fp(async function dbPlugin(fastify: FastifyInstance) {
   const schema = readFileSync(paths.schemaFile, "utf-8");
   db.exec(schema);
 
-  // 迁移：为旧版 photo 表补充 object_key 列
-  try {
-    db.exec("alter table photo add column object_key text not null default ''");
-  } catch {
-    // 列已存在，忽略
-  }
-
-  // 迁移：移除旧版 photo 表中不再使用的 url 列
-  try {
-    db.exec("alter table photo drop column url");
-  } catch {
-    // 列不存在或 SQLite 版本不支持，忽略
-  }
-
   fastify.decorate("db", db);
 
   fastify.addHook("onClose", () => {

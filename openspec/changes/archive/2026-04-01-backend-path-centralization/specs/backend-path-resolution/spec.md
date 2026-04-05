@@ -34,7 +34,7 @@
 
 #### Scenario: Python 渲染脚本路径可达
 
-- **WHEN** 生产环境启动并调用 `displayPhoto()`
+- **WHEN** 生产环境启动并调用 `renderPhoto()`
 - **THEN** `renderScriptPath` 指向 `release/backend/driver/waveshare/render_photo.py`，`cwd` 为该脚本所在目录，Python 进程可正常启动
 
 ### Requirement: 生产环境缓存路径正确
@@ -43,5 +43,5 @@
 
 #### Scenario: 缓存目录创建路径正确
 
-- **WHEN** 生产环境下 `displayPhoto()` 被调用
+- **WHEN** 生产环境下 `renderPhoto()` 被调用
 - **THEN** `mkdir` 在 `tuanzi-photo/data/cache/` 下创建目录，下载的图片写入该目录

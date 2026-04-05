@@ -1,5 +1,5 @@
 import fp from "fastify-plugin";
-import { displayPhoto, getDisplayRefreshState } from "../services/display.service.js";
+import { renderPhoto, getRenderRefreshState } from "../services/photo-render.service.js";
 import type { FastifyInstance } from "fastify";
 
 export interface ScreenService {
@@ -15,9 +15,9 @@ declare module "fastify" {
 
 export default fp(async function screenPlugin(fastify: FastifyInstance) {
   const screen: ScreenService = {
-    pushPhoto: displayPhoto,
+    pushPhoto: renderPhoto,
     get isRefreshing() {
-      return getDisplayRefreshState();
+      return getRenderRefreshState();
     },
   };
 
