@@ -8,6 +8,7 @@ import screenPlugin from "./plugins/screen.js";
 import photosRoutes from "./routes/photos.js";
 import tagsRoutes from "./routes/tags.js";
 import scheduleRoutes from "./routes/schedule.js";
+import batteryRoutes from "./routes/battery.js";
 import multipart from "@fastify/multipart";
 import { err } from "./utils/response.js";
 
@@ -44,6 +45,7 @@ if (env.nodeEnv === "production") {
 await app.register(photosRoutes, { prefix: "/api/v1" });
 await app.register(tagsRoutes, { prefix: "/api/v1" });
 await app.register(scheduleRoutes, { prefix: "/api/v1" });
+await app.register(batteryRoutes, { prefix: "/api/v1" });
 
 app.get("/health", async () => {
   return { status: "ok" };

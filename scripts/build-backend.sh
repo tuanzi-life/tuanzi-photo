@@ -129,20 +129,31 @@ deploy_backend() {
 }
 
 install_driver_deps() {
-  local driver_dir="release/backend/driver/waveshare"
-
-  if [[ ! -d "${driver_dir}" ]]; then
-    log "Driver directory not found at ${driver_dir}, skipping pip install"
-    return
-  fi
-
   if ! command -v pip3 >/dev/null 2>&1; then
     log "pip3 not found, skipping driver dependency installation"
     return
   fi
 
   log "Installing Python driver dependencies"
-  pip3 install -e "${driver_dir}" \
+
+  local waveshare_driver_dir="release/backend/driver/waveshare"
+  if [[ ! -d "${waveshare_driver_dir}" ]]; then
+    log "Driver directory not found at ${waveshare_driver_dir}, skipping pip install"
+    return
+  fi
+
+  pip3 install -e "${waveshare_driver_dir}" \
+    --quiet \
+    --disable-pip-version-check \
+    --break-system-packages
+
+  local ups_driver_dir="release/backend/driver/ups"
+  if [[ ! -d "${ups_driver_dir}" ]]; then
+    log "Driver directory not found at ${ups_driver_dir}, skipping pip install"
+    return
+  fi
+
+  pip3 install -e "${ups_driver_dir}" \
     --quiet \
     --disable-pip-version-check \
     --break-system-packages

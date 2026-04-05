@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePhotoStore } from "../stores/photo";
+import { useBatteryStore } from "../stores/battery";
 import MobileHeader from "../components/MobileHeader.vue";
 import MobileTabBar from "../components/MobileTabBar.vue";
 import InlineTagFilter from "../components/InlineTagFilter.vue";
@@ -11,9 +12,20 @@ import PhotoDetailOverlay from "../components/PhotoDetailOverlay.vue";
 import SchedulePanel from "../components/SchedulePanel.vue";
 
 const photoStore = usePhotoStore();
+const batteryStore = useBatteryStore();
 const { filteredPhotos, photos } = storeToRefs(photoStore);
 
 const activeTab = ref<"photos" | "schedule">("photos");
+let stopBatteryPolling: (() => void) | null = null;
+
+onMounted(() => {
+  stopBatteryPolling = batteryStore.startPolling();
+});
+
+onUnmounted(() => {
+  stopBatteryPolling?.();
+  stopBatteryPolling = null;
+});
 </script>
 
 <template>

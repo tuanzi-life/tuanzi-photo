@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { usePhotoStore } from "../stores/photo";
+import { useBatteryStore } from "../stores/battery";
 
 const photoStore = usePhotoStore();
+const batteryStore = useBatteryStore();
 const fileInput = ref<HTMLInputElement | null>(null);
 const uploading = ref(false);
 
@@ -36,14 +38,23 @@ async function onFileChange(event: Event) {
       class="hidden"
       @change="onFileChange"
     />
-    <UButton
-      color="primary"
-      icon="i-lucide-plus"
-      size="sm"
-      :loading="uploading"
-      @click="triggerUpload"
-    >
-      上传照片
-    </UButton>
+    <div class="flex items-center gap-3">
+      <div
+        v-if="batteryStore.percent !== null"
+        class="flex items-center gap-1.5 text-sm text-muted"
+      >
+        <UIcon name="i-lucide-battery-medium" class="size-4" />
+        <span>{{ batteryStore.percent }}%</span>
+      </div>
+      <UButton
+        color="primary"
+        icon="i-lucide-plus"
+        size="sm"
+        :loading="uploading"
+        @click="triggerUpload"
+      >
+        上传照片
+      </UButton>
+    </div>
   </header>
 </template>
