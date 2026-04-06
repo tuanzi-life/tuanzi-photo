@@ -27,7 +27,7 @@ async function onFileChange(event: Event) {
     class="flex items-center justify-between px-4 h-12 border-b border-default bg-default"
   >
     <div class="flex items-center gap-2">
-      <span class="w-2 h-2 rounded-full bg-primary inline-block" />
+      <img src="/logo.png" alt="Logo" class="w-8 h-8 rounded-full" />
       <span class="font-semibold text-sm text-highlighted">团子相册</span>
     </div>
     <input
