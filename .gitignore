@@ -7,8 +7,7 @@ apps/backend/dist/
 release/backend/
 
 # Data (runtime, not versioned)
-data/db/*
-data/uploads/*
+data/main/*
 data/cache/*
 data/logs/*
 !data/**/.gitkeep

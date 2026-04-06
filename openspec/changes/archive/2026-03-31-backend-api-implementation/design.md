@@ -2,7 +2,7 @@
 
 项目为树莓派 Zero 2W + 6色墨水屏电子相册，前端（Vue 3 + Nuxt UI）目前使用 mock 数据。后端框架为 Fastify v5，数据库为 SQLite（better-sqlite3），运行时内存约束为 512MB（Node.js 限制 128MB）。
 
-数据库已有 Schema：`photo`、`tag`、`photo_tag`、`schedule` 四张表，存储路径 `data/db/main.db`。
+数据库已有 Schema：`photo`、`tag`、`photo_tag`、`schedule` 四张表，存储路径 `data/main/main.db`。
 
 ## Goals / Non-Goals
 
@@ -68,7 +68,7 @@
 - **SQLite 单线程写入** → Fastify 默认单线程，better-sqlite3 同步驱动，无并发写入冲突风险
 - **isRefreshing 锁进程重启后丢失** → 重启后锁自动重置为 false，属于可接受行为；Python 脚本执行期间进程重启极小概率
 - **上传接口空实现** → 前端调用时会得到成功响应但无实际数据写入，需前端在接入 OSS 后同步修改
-- **data/db/ 目录不存在时启动失败** → 服务启动时检查并自动创建目录和初始化 Schema
+- **data/main/ 目录不存在时启动失败** → 服务启动时检查并自动创建目录和初始化 Schema
 
 ## Migration Plan
 

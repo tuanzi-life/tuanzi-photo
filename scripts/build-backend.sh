@@ -93,7 +93,7 @@ ensure_production_env() {
 }
 
 prepare_runtime_dirs() {
-  mkdir -p data/db data/uploads data/cache data/logs
+  mkdir -p data/main data/cache data/logs
   log "Ensured runtime directories under data/"
 }
 

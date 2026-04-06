@@ -13,12 +13,12 @@
 #### Scenario: 开发环境路径解析正确
 
 - **WHEN** 在开发环境（`NODE_ENV` 非 `production`）导入 `paths.ts`
-- **THEN** `APP_ROOT` 指向 `apps/backend/`，`PROJECT_ROOT` 指向 monorepo 根，`paths.dbFile` 为 `<monorepo_root>/data/db/main.db`，`paths.schemaFile` 为 `apps/backend/sql/schema.sql`，`paths.driverDir` 为 `apps/backend/driver/`，`paths.cacheDir` 为 `<monorepo_root>/data/cache/`
+- **THEN** `APP_ROOT` 指向 `apps/backend/`，`PROJECT_ROOT` 指向 monorepo 根，`paths.dbFile` 为 `<monorepo_root>/data/main/main.db`，`paths.schemaFile` 为 `apps/backend/sql/schema.sql`，`paths.driverDir` 为 `apps/backend/driver/`，`paths.cacheDir` 为 `<monorepo_root>/data/cache/`
 
 #### Scenario: 生产环境路径解析正确
 
 - **WHEN** 在生产环境（`NODE_ENV=production`）从 `release/backend/` 运行
-- **THEN** `APP_ROOT` 指向 `release/backend/`，`PROJECT_ROOT` 指向 `tuanzi-photo/`，`paths.dbFile` 为 `tuanzi-photo/data/db/main.db`，`paths.schemaFile` 为 `release/backend/sql/schema.sql`，`paths.driverDir` 为 `release/backend/driver/`，`paths.cacheDir` 为 `tuanzi-photo/data/cache/`
+- **THEN** `APP_ROOT` 指向 `release/backend/`，`PROJECT_ROOT` 指向 `tuanzi-photo/`，`paths.dbFile` 为 `tuanzi-photo/data/main/main.db`，`paths.schemaFile` 为 `release/backend/sql/schema.sql`，`paths.driverDir` 为 `release/backend/driver/`，`paths.cacheDir` 为 `tuanzi-photo/data/cache/`
 
 ### Requirement: 路径 NODE_ENV 判断集中
 

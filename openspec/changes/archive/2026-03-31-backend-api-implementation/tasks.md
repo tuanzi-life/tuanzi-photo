@@ -15,7 +15,7 @@
 ## 3. 数据库插件（plugins/db.ts）
 
 - [x] 3.1 新增 `src/plugins/db.ts`，用 `fastify-plugin` 封装 better-sqlite3 连接，挂载到 `fastify.db`
-- [x] 3.2 启动时检查并创建 `data/db/` 目录（若不存在）
+- [x] 3.2 启动时检查并创建 `data/main/` 目录（若不存在）
 - [x] 3.3 启动时执行 `schema.sql` 初始化表结构（幂等，`CREATE TABLE IF NOT EXISTS`）
 - [x] 3.4 启动时执行 `PRAGMA foreign_keys = ON`
 - [x] 3.5 为 TypeScript 添加 `fastify.db` 的类型声明扩展

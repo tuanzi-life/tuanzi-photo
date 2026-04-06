@@ -10,9 +10,9 @@ export const APP_ROOT = process.env.NODE_ENV === "production" ? __dirname : reso
 export const PROJECT_ROOT = resolve(APP_ROOT, "../..");
 
 export const DATA_DIR = resolve(PROJECT_ROOT, "data");
-export const DB_DIR = resolve(DATA_DIR, "db");
-export const DB_PATH = resolve(DB_DIR, "main.db");
 export const MAIN_DIR = resolve(DATA_DIR, "main");
+export const DB_DIR = MAIN_DIR;
+export const DB_PATH = resolve(DB_DIR, "main.db");
 export const RENDER_HISTORY_FILE = resolve(MAIN_DIR, "render_history.json");
 export const UPLOADS_DIR = resolve(DATA_DIR, "uploads");
 export const CACHE_DIR = resolve(DATA_DIR, "cache");

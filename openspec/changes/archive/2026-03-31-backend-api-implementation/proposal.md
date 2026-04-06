@@ -27,6 +27,6 @@
 
 - `packages/shared-types`：新增类型导出文件
 - `apps/backend/src/`：新增 plugins、routes、services 下的多个文件
-- 数据库路径：`data/db/main.db`（运行时，不进版本控制）
+- 数据库路径：`data/main/main.db`（运行时，不进版本控制）
 - 依赖：`better-sqlite3`（已在 schema.sql 注释中提及）、`@fastify/multipart`（上传接口预留）
 - 墨水屏推送通过 `child_process` 调用 Python SPI 驱动脚本，刷新期间使用 `isRefreshing` 布尔锁拒绝重复请求（返回 409）

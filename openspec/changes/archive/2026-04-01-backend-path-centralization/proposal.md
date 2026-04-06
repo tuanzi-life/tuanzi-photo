@@ -7,7 +7,7 @@
 - **新增** `apps/backend/src/paths.ts`：集中导出 `APP_ROOT`、`PROJECT_ROOT` 及常用路径常量（`dbFile`、`schemaFile`、`driverDir`、`cacheDir`），是唯一需要 `NODE_ENV` 判断的地方
 - **配置** `apps/backend/package.json` 的 `imports` 字段，添加 `"#paths": "./src/paths.js"` 别名，使 package 内任意层级的文件均可通过 `import { paths } from "#paths"` 引用，无需关心相对层级
 - **修复** `display.service.ts`：移除错误的 `backendRoot`（上溯层数多一级）、颠倒的 `driverBase` NODE_ENV 逻辑、错误的 `cacheDir`，改为 `import { paths } from "#paths"`
-- **重构** `db.ts`：移除脆弱的 `../../../../data/db/main.db` 4 级上溯和分散的 `SCHEMA_PATH` NODE_ENV 条件，改为 `import { paths } from "#paths"`
+- **重构** `db.ts`：移除脆弱的 `../../../../data/main/main.db` 4 级上溯和分散的 `SCHEMA_PATH` NODE_ENV 条件，改为 `import { paths } from "#paths"`
 - `env.ts` 和 `app.ts` 无需修改（路径计算本身正确）
 
 ## Capabilities
